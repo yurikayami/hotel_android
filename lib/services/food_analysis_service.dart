@@ -131,6 +131,86 @@ class FoodAnalysisService {
     }
   }
 
+  /// Update an analysis record with new data
+  ///
+  /// Updates food name, nutrition info, advice after Gemini re-identification
+  ///
+  /// Parameters:
+  /// - [id]: Analysis record ID
+  /// - [foodName]: Updated food name
+  /// - [confidence]: Updated confidence score
+  /// - [calories]: Updated calorie value
+  /// - [protein]: Updated protein value
+  /// - [fat]: Updated fat value
+  /// - [carbs]: Updated carbs value
+  /// - [advice]: Updated advice text
+  Future<void> updateAnalysis({
+    required int id,
+    required String foodName,
+    required double confidence,
+    required double calories,
+    required double protein,
+    required double fat,
+    required double carbs,
+    required String advice,
+  }) async {
+    try {
+      final url =
+          '${ApiConfig.baseUrl}${ApiConfig.foodAnalysis}/prediction/$id';
+      developer.log(
+        'Updating analysis: $id at URL: $url',
+        name: 'FoodAnalysisService',
+      );
+
+      final requestData = {
+        'foodName': foodName,
+        'confidence': confidence,
+        'calories': calories,
+        'protein': protein,
+        'fat': fat,
+        'carbs': carbs,
+        'advice': advice,
+      };
+
+      final response = await _dio.put(
+        url,
+        data: requestData,
+      );
+
+      developer.log(
+        'Update response status: ${response.statusCode}',
+        name: 'FoodAnalysisService',
+      );
+
+      if (response.statusCode != 200) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          error: 'Failed to update analysis',
+        );
+      }
+
+      developer.log(
+        'Successfully updated analysis: $id',
+        name: 'FoodAnalysisService',
+      );
+    } on DioException catch (e) {
+      developer.log(
+        'Error updating analysis: ${e.message}',
+        name: 'FoodAnalysisService',
+        error: e,
+      );
+      rethrow;
+    } catch (e) {
+      developer.log(
+        'Error updating analysis: $e',
+        name: 'FoodAnalysisService',
+        error: e,
+      );
+      rethrow;
+    }
+  }
+
   /// Delete an analysis record
   ///
   /// Removes a specific analysis from history

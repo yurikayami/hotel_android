@@ -166,7 +166,7 @@ class BaiThuocProvider with ChangeNotifier {
     if (errorStr.contains('socketexception') ||
         errorStr.contains('failed host lookup') ||
         errorStr.contains('connection refused')) {
-      return 'Không thể kết nối đến server. Vui lòng kiểm tra:\n• Kết nối mạng\n• Địa chỉ API (192.168.1.3:7135)';
+      return 'Không thể kết nối đến server. Vui lòng kiểm tra:\n• Kết nối mạng\n• Địa chỉ API (10.227.9.96:7135)';
     }
 
     if (errorStr.contains('timeoutexception')) {

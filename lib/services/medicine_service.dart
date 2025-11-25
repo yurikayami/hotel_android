@@ -4,7 +4,7 @@ import '../models/medicine.dart';
 
 /// Service for handling Medicine/Health Tips API calls
 class MedicineService {
-  static const String baseUrl = 'https://192.168.1.3:7135';
+  static const String baseUrl = 'https://10.227.9.96:7135';
 
   /// Get public medicines for a specific user
   static Future<List<Medicine>> getPublicMedicines(

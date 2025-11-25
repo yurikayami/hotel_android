@@ -7,10 +7,7 @@ import '../../models/mon_an.dart';
 class MonAnDetailScreen extends StatefulWidget {
   final MonAn monAn;
 
-  const MonAnDetailScreen({
-    super.key,
-    required this.monAn,
-  });
+  const MonAnDetailScreen({super.key, required this.monAn});
 
   @override
   State<MonAnDetailScreen> createState() => _MonAnDetailScreenState();
@@ -38,7 +35,7 @@ class _MonAnDetailScreenState extends State<MonAnDetailScreen> {
             if (mon.image != null && mon.image!.isNotEmpty)
               ClipRRect(
                 child: SizedBox(
-                  height: 300,
+                  height: 250,
                   width: double.infinity,
                   child: _buildDishImage(mon.image!),
                 ),
@@ -208,11 +205,7 @@ class _MonAnDetailScreenState extends State<MonAnDetailScreen> {
       return Container(
         color: Colors.grey.shade200,
         child: Center(
-          child: Icon(
-            Icons.restaurant,
-            size: 80,
-            color: Colors.grey.shade400,
-          ),
+          child: Icon(Icons.restaurant, size: 80, color: Colors.grey.shade400),
         ),
       );
     }
@@ -257,8 +250,7 @@ class _MonAnDetailScreenState extends State<MonAnDetailScreen> {
         return Center(
           child: CircularProgressIndicator(
             value: progress.expectedTotalBytes != null
-                ? progress.cumulativeBytesLoaded /
-                    progress.expectedTotalBytes!
+                ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
                 : null,
           ),
         );
@@ -276,4 +268,3 @@ class _MonAnDetailScreenState extends State<MonAnDetailScreen> {
     );
   }
 }
-

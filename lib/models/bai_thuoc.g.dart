@@ -37,4 +37,3 @@ Map<String, dynamic> _$BaiThuocToJson(BaiThuoc instance) => <String, dynamic>{
   'authorName': instance.authorName,
   'authorAvatar': instance.authorAvatar,
 };
-

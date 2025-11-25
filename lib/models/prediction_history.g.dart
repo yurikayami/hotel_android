@@ -71,4 +71,3 @@ Map<String, dynamic> _$PredictionDetailToJson(PredictionDetail instance) =>
       'fat': instance.fat,
       'carbs': instance.carbs,
     };
-

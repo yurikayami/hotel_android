@@ -44,7 +44,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Future<void> _pickImages() async {
     try {
       setState(() => _isLoading = true);
-      
+
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
         maxHeight: 1920,
@@ -99,14 +99,16 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       final mimeType = _getImageMimeType(_selectedImages[0].path);
       final dataUri = 'data:$mimeType;base64,$base64String';
 
-      print('[CreatePostScreen] Image converted successfully, length: ${base64String.length} chars');
+      print(
+        '[CreatePostScreen] Image converted successfully, length: ${base64String.length} chars',
+      );
       return dataUri;
     } catch (e) {
       print('[CreatePostScreen] Error saving image to base64: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Lỗi: Không thể lưu ảnh')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Lỗi: Không thể lưu ảnh')));
       }
       return null;
     }
@@ -142,9 +144,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     final content = _getContentFromQuill();
 
     if (content.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập nội dung')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Vui lòng nhập nội dung')));
       return;
     }
 
@@ -162,7 +164,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           throw Exception('Không thể chuyển đổi ảnh sang Base64');
         }
 
-        print('[CreatePostScreen] Image saved to Base64, length: ${duongDanMedia.length} chars');
+        print(
+          '[CreatePostScreen] Image saved to Base64, length: ${duongDanMedia.length} chars',
+        );
       }
 
       print('[CreatePostScreen] Creating post with:');
@@ -182,9 +186,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
       }
     } finally {
       setState(() => _isLoading = false);
@@ -192,7 +196,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   ImageProvider _getAvatarImage(String? avatarUrl) {
-    if (avatarUrl != null && avatarUrl.isNotEmpty && avatarUrl.startsWith('http')) {
+    if (avatarUrl != null &&
+        avatarUrl.isNotEmpty &&
+        avatarUrl.startsWith('http')) {
       return NetworkImage(avatarUrl);
     }
     return const AssetImage('assets/images/avatar.jpg');
@@ -201,8 +207,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final hasContent = _contentController.text.trim().isNotEmpty ||
-        _selectedImages.isNotEmpty;
+    final hasContent =
+        _contentController.text.trim().isNotEmpty || _selectedImages.isNotEmpty;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -221,11 +227,16 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               onPressed: (_isLoading || !hasContent) ? null : _submitPost,
               style: FilledButton.styleFrom(
                 backgroundColor: colorScheme.primary,
-                disabledBackgroundColor: colorScheme.primary.withValues(alpha: 0.3),
+                disabledBackgroundColor: colorScheme.primary.withValues(
+                  alpha: 0.3,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ),
               ),
               child: _isLoading
                   ? SizedBox(
@@ -278,9 +289,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           if (_isLoading)
             Container(
               color: Colors.black.withValues(alpha: 0.3),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
+              child: const Center(child: CircularProgressIndicator()),
             ),
         ],
       ),
@@ -371,19 +380,16 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: colorScheme.outlineVariant,
-          width: 1,
-        ),
+        border: Border.all(color: colorScheme.outlineVariant, width: 1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
           Text(
             'Thêm vào bài viết',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
           ),
           const Spacer(),
           Material(
@@ -494,4 +500,3 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     );
   }
 }
-

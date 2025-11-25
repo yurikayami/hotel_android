@@ -35,7 +35,8 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.9) {
       context.read<PostProvider>().loadPosts();
     }
   }
@@ -86,20 +87,16 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
       floating: true,
       snap: true,
       elevation: 0,
-      backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
+      backgroundColor: Theme.of(
+        context,
+      ).colorScheme.surface.withValues(alpha: 0.95),
       surfaceTintColor: Colors.transparent,
       title: const Text(
         'Cộng đồng',
-        style: TextStyle(
-          fontWeight: FontWeight.w700,
-          fontSize: 20,
-        ),
+        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
       ),
       actions: [
-        IconButton(
-          icon: const Icon(Icons.search_rounded),
-          onPressed: () {},
-        ),
+        IconButton(icon: const Icon(Icons.search_rounded), onPressed: () {}),
       ],
     );
   }
@@ -111,11 +108,19 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.post_add_outlined, size: 64, color: Colors.grey.shade400),
+              Icon(
+                Icons.post_add_outlined,
+                size: 64,
+                color: Colors.grey.shade400,
+              ),
               const SizedBox(height: 16),
               Text(
                 'Chưa có bài viết nào',
-                style: TextStyle(fontSize: 18, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -155,10 +160,15 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
-          Text(error, textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade600)),
+          Text(
+            error,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey.shade600),
+          ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () => context.read<PostProvider>().loadPosts(refresh: true),
+            onPressed: () =>
+                context.read<PostProvider>().loadPosts(refresh: true),
             icon: const Icon(Icons.refresh),
             label: const Text('Thử lại'),
           ),
@@ -171,11 +181,10 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return FloatingActionButton.extended(
+      heroTag: 'post_feed_new_fab',
       onPressed: () async {
         final result = await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const CreatePostScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => const CreatePostScreen()),
         );
 
         if (result == true && mounted) {
@@ -256,7 +265,8 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                   _buildHeader(context),
                   const SizedBox(height: 12),
                   _buildContent(context),
-                  if (post.duongDanMedia != null && post.duongDanMedia!.isNotEmpty)
+                  if (post.duongDanMedia != null &&
+                      post.duongDanMedia!.isNotEmpty)
                     _buildMedia(context),
                 ],
               ),
@@ -357,12 +367,8 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
             color: colorScheme.onSurfaceVariant,
           ),
           itemBuilder: (context) => [
-            const PopupMenuItem(
-              child: Text('Báo cáo bài viết'),
-            ),
-            const PopupMenuItem(
-              child: Text('Không quan tâm'),
-            ),
+            const PopupMenuItem(child: Text('Báo cáo bài viết')),
+            const PopupMenuItem(child: Text('Không quan tâm')),
           ],
         ),
       ],
@@ -464,7 +470,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
           },
         );
       } else if (mediaUrl.startsWith('/upload/')) {
-        final fullUrl = 'https://192.168.1.3:7135$mediaUrl';
+        final fullUrl = 'https://10.227.9.96:7135$mediaUrl';
         return Image.network(
           fullUrl,
           fit: BoxFit.cover,
@@ -500,10 +506,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
           const SizedBox(height: 8),
           Text(
             'Không thể tải ảnh',
-            style: TextStyle(
-              color: colorScheme.onSurfaceVariant,
-              fontSize: 12,
-            ),
+            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12),
           ),
         ],
       ),
@@ -535,7 +538,9 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
           ),
           _buildActionButton(
             colorScheme,
-            icon: _isLiked ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
+            icon: _isLiked
+                ? Icons.favorite_rounded
+                : Icons.favorite_outline_rounded,
             count: (metrics.luotThich ?? 0),
             label: 'Thích',
             color: _isLiked ? Colors.red : null,
@@ -582,13 +587,15 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
               if (count > 0) ...[
                 const SizedBox(width: 6),
                 Text(
-                  count > 999 ? '${(count / 1000).toStringAsFixed(1)}K' : count.toString(),
+                  count > 999
+                      ? '${(count / 1000).toStringAsFixed(1)}K'
+                      : count.toString(),
                   style: TextStyle(
                     fontSize: 13,
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
-              ]
+              ],
             ],
           ),
         ),
@@ -596,4 +603,3 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     );
   }
 }
-

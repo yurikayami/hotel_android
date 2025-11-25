@@ -6,7 +6,6 @@ import '../food/food_analysis_screen.dart';
 import '../bai_thuoc/bai_thuoc_list_screen.dart';
 import '../profile/my_profile_screen.dart';
 
-/// Modern home screen with bottom navigation
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -18,100 +17,139 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    const PostFeedScreen(),           // index 0: Trang chủ
-    const BaiThuocListScreen(),       // index 1: Bài Thuốc
-    const FoodAnalysisScreen(),       // index 2: Phân Tích (Camera - Center)
-    const MonAnScreen(),              // index 3: Món Ăn
-    const MyProfileScreen(),          // index 4: Cá nhân
+    const PostFeedScreen(),       // 0
+    const BaiThuocListScreen(),   // 1
+    const FoodAnalysisScreen(),   // 2 (Camera)
+    const MonAnScreen(),          // 3
+    const MyProfileScreen(),      // 4
   ];
+
+  void _onItemTapped(int index) {
+    if (index == 2) {
+      // Nếu bấm vào vị trí giữa (Camera) thì mở màn hình chụp
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const FoodAnalysisScreen(),
+        ),
+      );
+    } else {
+      setState(() {
+        _currentIndex = index;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      body: _screens[_currentIndex],
-      bottomNavigationBar: ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-          child: Container(
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
+      ),
+      // Dùng Stack ở bottomNavigationBar để nút Camera có thể "lòi ra" đè lên trên
+      bottomNavigationBar: Stack(
+        alignment: Alignment.bottomCenter,
+        clipBehavior: Clip.none, // Quan trọng: Cho phép nút lòi ra ngoài khung
+        children: [
+          // 1. THANH NAVIGATION BAR CHUẨN (Đã hạ chiều cao)
+          Container(
+            // Tạo bóng mờ phía sau thanh bar cho đẹp
             decoration: BoxDecoration(
-              color: colorScheme.surface.withValues(alpha: 0.7),
-              border: Border(
-                top: BorderSide(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  width: 1.2,
-                ),
-              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 20,
-                  offset: const Offset(0, -4),
-                  spreadRadius: 2,
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, -2),
                 ),
               ],
             ),
-            child: Theme(
-              data: Theme.of(context).copyWith(
-                navigationBarTheme: NavigationBarThemeData(
-                  indicatorColor: _currentIndex == 2 ? Colors.transparent : null,
+            child: NavigationBarTheme(
+              data: NavigationBarThemeData(
+                height: 70, // HẠ CHIỀU CAO XUỐNG (Mặc định là 80)
+                indicatorColor: colorScheme.primaryContainer,
+                labelTextStyle: WidgetStateProperty.all(
+                  const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
                 ),
               ),
               child: NavigationBar(
                 selectedIndex: _currentIndex,
-                onDestinationSelected: (index) {
-                  setState(() => _currentIndex = index);
-                },
-                backgroundColor: Colors.transparent,
+                onDestinationSelected: _onItemTapped,
+                backgroundColor: colorScheme.surface.withValues(alpha: 0.95),
                 elevation: 0,
                 destinations: [
-                  NavigationDestination(
-                    icon: Icon(_currentIndex == 0 ? Icons.home : Icons.home_outlined),
+                  const NavigationDestination(
+                    icon: Icon(Icons.home_outlined),
+                    selectedIcon: Icon(Icons.home),
                     label: 'Trang chủ',
                   ),
-                  NavigationDestination(
-                    icon: Icon(_currentIndex == 1 ? Icons.local_hospital_rounded : Icons.local_hospital_outlined),
-                    label: 'Bài Thuốc',
+                  const NavigationDestination(
+                    icon: Icon(Icons.local_hospital_outlined),
+                    selectedIcon: Icon(Icons.local_hospital_rounded),
+                    label: 'Bài thuốc',
                   ),
-                  // Center Camera Button - Prominent Style (index 2)
-                  NavigationDestination(
-                    icon: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: colorScheme.primary.withValues(alpha: 0.4),
-                            blurRadius: 12,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.camera_alt_rounded,
-                        color: colorScheme.onPrimary,
-                        size: 24,
-                      ),
-                    ),
-                    label: 'Phân Tích',
+                  
+                  // ITEM Ở GIỮA: Giữ chỗ (Sẽ bị nút tròn đè lên)
+                  const NavigationDestination(
+                    icon: SizedBox.shrink(), // Icon rỗng để không bị trùng
+                    label: '', // Không hiện chữ
+                    enabled: false, // Không cho bấm vào item chìm này (đã xử lý ở nút nổi)
                   ),
-                  NavigationDestination(
-                    icon: Icon(_currentIndex == 3 ? Icons.restaurant_menu : Icons.restaurant_menu_outlined),
+
+                  const NavigationDestination(
+                    icon: Icon(Icons.restaurant_menu_outlined),
+                    selectedIcon: Icon(Icons.restaurant_menu),
                     label: 'Món Ăn',
                   ),
-                  NavigationDestination(
-                    icon: Icon(_currentIndex == 4 ? Icons.person : Icons.person_outline),
+                  const NavigationDestination(
+                    icon: Icon(Icons.person_outline),
+                    selectedIcon: Icon(Icons.person),
                     label: 'Cá nhân',
                   ),
                 ],
               ),
             ),
           ),
-        ),
+
+          // 2. NÚT CAMERA LỒI RA (Nằm đè lên trên NavigationBar)
+          Positioned(
+            bottom: 20, // Đẩy nút lên cao để tạo hiệu ứng "lòi ra"
+            child: GestureDetector(
+              onTap: () => _onItemTapped(2),
+              child: Container(
+                height: 64, // Kích thước nút to hơn thanh bar một chút
+                width: 64,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      colorScheme.primary,
+                      colorScheme.primary.withValues(alpha: 0.8),
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colorScheme.primary.withValues(alpha: 0.4),
+                      blurRadius: 12,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.camera_alt_rounded,
+                  color: colorScheme.onPrimary,
+                  size: 32,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
-

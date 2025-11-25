@@ -45,9 +45,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       setState(() => _comments = comments);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi tải bình luận: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Lỗi tải bình luận: $e')));
       }
     } finally {
       if (mounted) {
@@ -58,9 +58,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
   Future<void> _submitComment() async {
     if (_commentController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập bình luận')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Vui lòng nhập bình luận')));
       return;
     }
 
@@ -68,23 +68,23 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     try {
       await context.read<PostProvider>().addComment(
-            postId: widget.post.id,
-            noiDung: _commentController.text,
-          );
+        postId: widget.post.id,
+        noiDung: _commentController.text,
+      );
 
       _commentController.clear();
       await _loadComments(); // Reload comments
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Bình luận thành công')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Bình luận thành công')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
       }
     } finally {
       if (mounted) {
@@ -126,9 +126,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => UserProfileScreen(
-                              userId: widget.post.authorId,
-                            ),
+                            builder: (context) =>
+                                UserProfileScreen(userId: widget.post.authorId),
                           ),
                         );
                       },
@@ -137,11 +136,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                           CircleAvatar(
                             radius: 24,
                             backgroundColor: colorScheme.primaryContainer,
-                            backgroundImage: widget.post.authorAvatar != null &&
+                            backgroundImage:
+                                widget.post.authorAvatar != null &&
                                     widget.post.authorAvatar!.startsWith('http')
                                 ? NetworkImage(widget.post.authorAvatar!)
                                 : const AssetImage('assets/images/avatar.jpg')
-                                    as ImageProvider,
+                                      as ImageProvider,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -150,13 +150,15 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                               children: [
                                 Text(
                                   widget.post.authorName,
-                                  style: theme.textTheme.bodyLarge
-                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 Text(
                                   widget.post.ngayDang != null
-                                      ? DateFormat('dd/MM/yyyy HH:mm')
-                                          .format(widget.post.ngayDang!)
+                                      ? DateFormat(
+                                          'dd/MM/yyyy HH:mm',
+                                        ).format(widget.post.ngayDang!)
                                       : 'N/A',
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: colorScheme.onSurfaceVariant,
@@ -180,8 +182,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     else
                       Text(
                         widget.post.noiDung,
-                        style: theme.textTheme.bodyLarge
-                            ?.copyWith(height: 1.6),
+                        style: theme.textTheme.bodyLarge?.copyWith(height: 1.6),
                       ),
 
                     // Image display (if available)
@@ -205,8 +206,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     // Comments section title
                     Text(
                       'Bình luận (${_comments.length})',
-                      style: theme.textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 12),
 
@@ -283,10 +285,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                               ),
                             ),
                           )
-                        : const Icon(
-                            Icons.send,
-                            color: Colors.white,
-                          ),
+                        : const Icon(Icons.send, color: Colors.white),
                     onPressed: _isSubmittingComment ? null : _submitComment,
                   ),
                 ),
@@ -303,11 +302,23 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final colorScheme = theme.colorScheme;
 
     // Handle different comment structures
-    final authorName = comment is Map ? comment['authorName'] ?? comment['userName'] ?? 'Người dùng' : 'Người dùng';
-    final authorAvatar = comment is Map ? comment['authorAvatar'] ?? comment['userAvatar'] : null;
-    final authorId = comment is Map ? comment['authorId'] ?? comment['userId'] : null;
-    final content = comment is Map ? comment['noiDung'] ?? comment['content'] ?? '' : '';
-    final createdAt = comment is Map ? comment['createdAt'] ?? comment['ngayTao'] ?? DateTime.now().toString() : '';
+    final authorName = comment is Map
+        ? comment['authorName'] ?? comment['userName'] ?? 'Người dùng'
+        : 'Người dùng';
+    final authorAvatar = comment is Map
+        ? comment['authorAvatar'] ?? comment['userAvatar']
+        : null;
+    final authorId = comment is Map
+        ? comment['authorId'] ?? comment['userId']
+        : null;
+    final content = comment is Map
+        ? comment['noiDung'] ?? comment['content'] ?? ''
+        : '';
+    final createdAt = comment is Map
+        ? comment['createdAt'] ??
+              comment['ngayTao'] ??
+              DateTime.now().toString()
+        : '';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -320,9 +331,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => UserProfileScreen(
-                          userId: authorId.toString(),
-                        ),
+                        builder: (context) =>
+                            UserProfileScreen(userId: authorId.toString()),
                       ),
                     );
                   }
@@ -330,11 +340,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             child: CircleAvatar(
               radius: 16,
               backgroundColor: colorScheme.primaryContainer,
-              backgroundImage: authorAvatar != null &&
+              backgroundImage:
+                  authorAvatar != null &&
                       authorAvatar.toString().startsWith('http')
                   ? NetworkImage(authorAvatar.toString())
                   : const AssetImage('assets/images/avatar.jpg')
-                      as ImageProvider,
+                        as ImageProvider,
             ),
           ),
           const SizedBox(width: 12),
@@ -345,9 +356,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => UserProfileScreen(
-                            userId: authorId.toString(),
-                          ),
+                          builder: (context) =>
+                              UserProfileScreen(userId: authorId.toString()),
                         ),
                       );
                     }
@@ -357,14 +367,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 children: [
                   Text(
                     authorName,
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    content,
-                    style: theme.textTheme.bodySmall,
-                  ),
+                  Text(content, style: theme.textTheme.bodySmall),
                   const SizedBox(height: 4),
                   Text(
                     _formatCommentDate(createdAt),
@@ -412,10 +420,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         final base64Data = mediaUrl.split(',').last;
         return Container(
           width: double.infinity,
-          constraints: const BoxConstraints(
-            maxHeight: 400,
-            minHeight: 200,
-          ),
+          constraints: const BoxConstraints(maxHeight: 400, minHeight: 200),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             color: colorScheme.surfaceVariant,
@@ -431,16 +436,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             ),
           ),
         );
-      } 
+      }
       // Check if it's a relative path (starts with /upload/)
       else if (mediaUrl.startsWith('/upload/')) {
-        final fullUrl = 'https://192.168.1.3:7135$mediaUrl';
+        final fullUrl = 'https://10.227.9.96:7135$mediaUrl';
         return Container(
           width: double.infinity,
-          constraints: const BoxConstraints(
-            maxHeight: 400,
-            minHeight: 200,
-          ),
+          constraints: const BoxConstraints(maxHeight: 400, minHeight: 200),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             color: colorScheme.surfaceVariant,
@@ -461,10 +463,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       else {
         return Container(
           width: double.infinity,
-          constraints: const BoxConstraints(
-            maxHeight: 400,
-            minHeight: 200,
-          ),
+          constraints: const BoxConstraints(maxHeight: 400, minHeight: 200),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             color: colorScheme.surfaceVariant,
@@ -580,11 +579,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon,
-                color: colorScheme.onSurfaceVariant,
-                size: 20,
-              ),
+              Icon(icon, color: colorScheme.onSurfaceVariant, size: 20),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -614,4 +609,3 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 }
-

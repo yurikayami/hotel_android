@@ -86,7 +86,7 @@ Từ màn hình cá nhân (Profile), nhấn vào nút **"Phân Tích Món Ăn �
 Đảm bảo backend đang chạy tại địa chỉ được cấu hình trong `lib/services/api_config.dart`:
 
 ```dart
-static const String baseUrl = 'https://192.168.1.3:7135/api';
+static const String baseUrl = 'https://10.227.9.96:7135/api';
 static const String foodAnalysis = '/FoodAnalysis';
 ```
 

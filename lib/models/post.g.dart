@@ -65,4 +65,3 @@ Map<String, dynamic> _$PostPagedResultToJson(PostPagedResult instance) =>
       'hasPrevious': instance.hasPrevious,
       'hasNext': instance.hasNext,
     };
-

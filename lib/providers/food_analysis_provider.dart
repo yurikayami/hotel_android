@@ -30,12 +30,12 @@ class FoodAnalysisProvider extends ChangeNotifier {
 
   /// Analyze a food image
   /// 
-  /// Takes an image file and sends it to the backend for AI analysis
-  /// Updates state with the analysis results
+  /// Takes an image file and sends it to the backend for AI analysis.
   Future<void> analyzeFood({
     required String userId,
     required XFile imageFile,
     String mealType = 'lunch',
+    double userCalorieTarget = 2000,
   }) async {
     try {
       _isLoading = true;
@@ -61,10 +61,11 @@ class FoodAnalysisProvider extends ChangeNotifier {
       }
 
       developer.log(
-        'Analysis completed: ${result.foodName}',
+        'Analysis completed: ${result.foodName} (confidence: ${result.confidence})',
         name: 'FoodAnalysisProvider',
       );
 
+      _applyFilters();
       _isLoading = false;
       notifyListeners();
     } catch (e, stackTrace) {

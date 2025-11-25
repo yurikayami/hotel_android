@@ -9,7 +9,6 @@ import '../../services/comment_service.dart';
 import '../../widgets/html_content_viewer.dart';
 import '../auth/login_screen.dart';
 import '../posts/post_detail_screen.dart';
-import '../food/food_analysis_screen.dart';
 import '../settings/settings_screen.dart';
 import 'user_profile_screen.dart';
 
@@ -244,14 +243,35 @@ class _MyProfileScreenState extends State<MyProfileScreen>
   }
 
   void _handleLogout(BuildContext context) {
-    context.read<AuthProvider>().logout().then((_) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (context) => const LoginScreen(),
-        ),
-        (route) => false,
-      );
-    });
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Xác nhận đăng xuất'),
+          content: const Text('Bạn có chắc chắn muốn đăng xuất không?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Hủy'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                context.read<AuthProvider>().logout().then((_) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (context) => const LoginScreen(),
+                    ),
+                    (route) => false,
+                  );
+                });
+              },
+              child: const Text('Đăng xuất', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   /// Profile info with banner, avatar, bio and stats
@@ -314,64 +334,13 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                     ),
                   ),
                 ),
-                // Action icons beside avatar
-                Positioned(
-                  left: 156,
-                  bottom: -20,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Camera - Food Analysis
-                      _buildActionIcon(
-                        context,
-                        Icons.camera_alt_rounded,
-                        Colors.blue,
-                        () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const FoodAnalysisScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(width: 20),
-                      // Stats
-                      _buildActionIcon(
-                        context,
-                        Icons.bar_chart_rounded,
-                        Colors.blue,
-                        () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Tính năng thống kê đang phát triển'),
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(width: 20),
-                      // Medicine/Drugs
-                      _buildActionIcon(
-                        context,
-                        Icons.medical_services_rounded,
-                        Colors.blue,
-                        () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Tính năng thuốc đang phát triển'),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
+
               ],
             ),
           ),
           // Profile content
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 42, 16, 16),
+            padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -471,37 +440,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
     );
   }
 
-  /// Build action icon button
-  Widget _buildActionIcon(
-    BuildContext context,
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: color.withValues(alpha: 0.4),
-              width: 1.5,
-            ),
-          ),
-          child: Icon(
-            icon,
-            size: 20,
-            color: color,
-          ),
-        ),
-      ),
-    );
-  }
+
 
   ImageProvider _getAvatarImage(String? avatarUrl) {
     if (avatarUrl != null && avatarUrl.isNotEmpty && avatarUrl.startsWith('http')) {
@@ -888,7 +827,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
               const Center(child: Icon(Icons.broken_image_outlined)),
         );
       } else if (mediaUrl.startsWith('/upload/')) {
-        final fullUrl = 'https://192.168.1.3:7135$mediaUrl';
+        final fullUrl = 'https://10.227.9.96:7135$mediaUrl';
         return Image.network(
           fullUrl,
           fit: BoxFit.cover,
@@ -1140,7 +1079,7 @@ class _LikedPostCardState extends State<_LikedPostCard> {
           },
         );
       } else if (mediaUrl.startsWith('/upload/')) {
-        final fullUrl = 'https://192.168.1.3:7135$mediaUrl';
+        final fullUrl = 'https://10.227.9.96:7135$mediaUrl';
         return Image.network(
           fullUrl,
           fit: BoxFit.cover,

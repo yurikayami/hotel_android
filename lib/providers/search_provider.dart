@@ -41,6 +41,10 @@ class SearchProvider with ChangeNotifier {
   String _searchQuery = '';
   String _selectedType = 'all'; // all, users, posts, dishes, medicines
   List<String> _recentSearches = [];
+  
+  // Filter & Sort states for client-side filtering
+  String _filterCategory = 'Tất cả';
+  String _sortOption = 'default'; // default, price_asc, price_desc, likes, views, newest
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -48,11 +52,97 @@ class SearchProvider with ChangeNotifier {
   String get searchQuery => _searchQuery;
   String get selectedType => _selectedType;
   List<String> get recentSearches => _recentSearches;
+  String get filterCategory => _filterCategory;
+  String get sortOption => _sortOption;
 
   /// Set loại tìm kiếm được chọn
   void setSearchType(String type) {
     _selectedType = type;
     notifyListeners();
+  }
+
+  /// Set filter category
+  void setFilter(String category) {
+    _filterCategory = category;
+    notifyListeners();
+  }
+
+  /// Set sort option
+  void setSort(String option) {
+    _sortOption = option;
+    notifyListeners();
+  }
+
+  /// Get filtered and sorted dishes
+  List<MonAn> get filteredDishes {
+    List<MonAn> list = List.from(_results.dishes);
+    
+    // Apply sorting
+    switch (_sortOption) {
+      case 'price_asc':
+        list.sort((a, b) => (a.gia ?? 0).compareTo(b.gia ?? 0));
+        break;
+      case 'price_desc':
+        list.sort((a, b) => (b.gia ?? 0).compareTo(a.gia ?? 0));
+        break;
+      case 'views':
+        list.sort((a, b) => (b.luotXem ?? 0).compareTo(a.luotXem ?? 0));
+        break;
+      case 'newest':
+        list.sort((a, b) => (b.ngayTao ?? DateTime(2000)).compareTo(a.ngayTao ?? DateTime(2000)));
+        break;
+      case 'default':
+      default:
+        // Keep original order
+        break;
+    }
+    
+    return list;
+  }
+
+  /// Get filtered and sorted posts
+  List<Post> get filteredPosts {
+    List<Post> list = List.from(_results.posts);
+    
+    // Apply sorting
+    switch (_sortOption) {
+      case 'likes':
+        list.sort((a, b) => (b.luotThich ?? 0).compareTo(a.luotThich ?? 0));
+        break;
+      case 'newest':
+        list.sort((a, b) => (b.ngayDang ?? DateTime(2000)).compareTo(a.ngayDang ?? DateTime(2000)));
+        break;
+      case 'default':
+      default:
+        // Keep original order
+        break;
+    }
+    
+    return list;
+  }
+
+  /// Get filtered and sorted medicines
+  List<Medicine> get filteredMedicines {
+    List<Medicine> list = List.from(_results.medicines);
+    
+    // Apply sorting
+    switch (_sortOption) {
+      case 'likes':
+        list.sort((a, b) => b.soLuotThich.compareTo(a.soLuotThich));
+        break;
+      case 'views':
+        list.sort((a, b) => b.soLuotXem.compareTo(a.soLuotXem));
+        break;
+      case 'newest':
+        list.sort((a, b) => b.ngayTao.compareTo(a.ngayTao));
+        break;
+      case 'default':
+      default:
+        // Keep original order
+        break;
+    }
+    
+    return list;
   }
 
   /// Clear tất cả kết quả tìm kiếm
@@ -108,7 +198,7 @@ class SearchProvider with ChangeNotifier {
     try {
       // Gọi API tổng quát - dùng queryParameters để encode đúng
       final Uri uri = Uri.https(
-        '192.168.1.3:7135',
+        '10.227.9.96:7135',
         '/api/search',
         {
           'query': query,
@@ -300,7 +390,7 @@ class SearchProvider with ChangeNotifier {
 
     try {
       final Uri uri = Uri.https(
-        '192.168.1.3:7135',
+        '10.227.9.96:7135',
         '/api/search/suggestions',
         {
           'query': query,

@@ -44,4 +44,3 @@ Map<String, dynamic> _$AuthResponseToJson(AuthResponse instance) =>
       'token': instance.token,
       'user': instance.user,
     };
-

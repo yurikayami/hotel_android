@@ -8,12 +8,13 @@ import '../../models/post.dart';
 import '../../models/mon_an.dart';
 import '../../models/user.dart';
 import '../../models/medicine.dart';
+import '../../utils/image_url_helper.dart';
 import '../posts/post_detail_screen.dart';
 import '../food/mon_an_detail_screen.dart';
 import '../profile/user_profile_screen.dart';
 import '../bai_thuoc/bai_thuoc_detail_screen.dart';
 
-/// Màn hình tìm kiếm tổng quát với tabs giống user_profile_screen.dart
+/// Màn hình tìm kiếm tổng quát với tabs và filter/sort
 class GeneralSearchScreen extends StatefulWidget {
   const GeneralSearchScreen({super.key});
 
@@ -29,10 +30,6 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
   final List<String> _tabLabels = ['Tất cả', 'Người dùng', 'Bài viết', 'Bài thuốc', 'Món ăn'];
   final List<String> _tabTypes = ['all', 'users', 'posts', 'medicines', 'dishes'];
   final _priceFormatter = NumberFormat('#,###', 'vi_VN');
-
-  // Sort & Filter states
-  String _dishSortBy = 'name_asc'; // name_asc, name_desc, price_asc, price_desc, newest, oldest, view
-  String _globalDateFilter = 'all'; // all, today, week, month, year
 
   Timer? _debounceTimer;
 
@@ -97,25 +94,28 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Consumer<SearchProvider>(
           builder: (context, provider, child) {
-            return NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) {
-                return [
-                  // App bar with search field
-                  _buildAppBar(context, provider),
-                  
-                  // Tab bar
-                  _buildTabBar(context),
-                ];
-              },
-              body: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildAllTab(provider),
-                  _buildUsersTab(provider),
-                  _buildPostsTab(provider),
-                  _buildMedicinesTab(provider),
-                  _buildDishesTab(provider),
-                ],
+            return DefaultTabController(
+              length: _tabLabels.length,
+              child: NestedScrollView(
+                headerSliverBuilder: (context, innerBoxIsScrolled) {
+                  return [
+                    // App bar with search field
+                    _buildAppBar(context, provider),
+                    
+                    // Tab bar
+                    _buildTabBar(context),
+                  ];
+                },
+                body: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildAllTab(provider),
+                    _buildUsersTab(provider),
+                    _buildPostsTab(provider),
+                    _buildMedicinesTab(provider),
+                    _buildDishesTab(provider),
+                  ],
+                ),
               ),
             );
           },
@@ -124,7 +124,7 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
     );
   }
 
-  /// App bar với search field và filter button
+  /// App bar với search field
   Widget _buildAppBar(BuildContext context, SearchProvider provider) {
     return SliverAppBar(
       pinned: true,
@@ -145,16 +145,10 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
           controller: _searchController,
           focusNode: _searchFocusNode,
           autofocus: true,
-          enableSuggestions: true,
-          autocorrect: false,
-          textInputAction: TextInputAction.search,
           style: const TextStyle(color: Colors.white, fontSize: 16),
           decoration: InputDecoration(
             hintText: 'Tìm kiếm...',
-            hintStyle: TextStyle(
-              color: Colors.grey[500],
-              fontSize: 16,
-            ),
+            hintStyle: TextStyle(color: Colors.grey[500], fontSize: 16),
             prefixIcon: Icon(Icons.search, color: Colors.grey[500]),
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
@@ -175,107 +169,46 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
           },
         ),
       ),
-      actions: [
-        PopupMenuButton<String>(
-          icon: const Icon(Icons.more_vert, color: Colors.white),
-          onSelected: (value) {
-            setState(() => _globalDateFilter = value);
-            if (_searchController.text.isNotEmpty) {
-              // Re-search with new filter applied
-              _performSearch(_searchController.text);
-            }
-          },
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'all',
-              child: Row(
-                children: [
-                  Icon(Icons.all_inclusive_rounded, color: _globalDateFilter == 'all' ? const Color(0xFF4CAF50) : Colors.grey),
-                  const SizedBox(width: 12),
-                  const Expanded(child: Text('Tất cả thời gian')),
-                  if (_globalDateFilter == 'all')
-                    const Icon(Icons.check, color: Color(0xFF4CAF50), size: 20),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'today',
-              child: Row(
-                children: [
-                  Icon(Icons.today, color: _globalDateFilter == 'today' ? const Color(0xFF4CAF50) : Colors.grey),
-                  const SizedBox(width: 12),
-                  const Expanded(child: Text('Hôm nay')),
-                  if (_globalDateFilter == 'today')
-                    const Icon(Icons.check, color: Color(0xFF4CAF50), size: 20),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'week',
-              child: Row(
-                children: [
-                  Icon(Icons.calendar_view_week, color: _globalDateFilter == 'week' ? const Color(0xFF4CAF50) : Colors.grey),
-                  const SizedBox(width: 12),
-                  const Expanded(child: Text('Tuần này')),
-                  if (_globalDateFilter == 'week')
-                    const Icon(Icons.check, color: Color(0xFF4CAF50), size: 20),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'month',
-              child: Row(
-                children: [
-                  Icon(Icons.calendar_view_month, color: _globalDateFilter == 'month' ? const Color(0xFF4CAF50) : Colors.grey),
-                  const SizedBox(width: 12),
-                  const Expanded(child: Text('Tháng này')),
-                  if (_globalDateFilter == 'month')
-                    const Icon(Icons.check, color: Color(0xFF4CAF50), size: 20),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'year',
-              child: Row(
-                children: [
-                  Icon(Icons.date_range, color: _globalDateFilter == 'year' ? const Color(0xFF4CAF50) : Colors.grey),
-                  const SizedBox(width: 12),
-                  const Expanded(child: Text('Năm này')),
-                  if (_globalDateFilter == 'year')
-                    const Icon(Icons.check, color: Color(0xFF4CAF50), size: 20),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 
-  /// Tab bar
+  /// Tab bar sticky with bottom divider
   Widget _buildTabBar(BuildContext context) {
-    return SliverPersistentHeader(
+    return SliverAppBar(
       pinned: true,
-      delegate: _SliverTabBarDelegate(
-        TabBar(
-          controller: _tabController,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.grey[500],
-          indicatorColor: const Color(0xFF4CAF50), // Green accent
-          indicatorWeight: 2,
-          indicatorSize: TabBarIndicatorSize.label,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          padding: EdgeInsets.zero,
-          dividerColor: Colors.transparent,
-          labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-          tabs: _tabLabels.map((label) => Tab(text: label)).toList(),
-        ),
+      elevation: 0,
+      backgroundColor: Colors.black,
+      surfaceTintColor: Colors.transparent,
+      automaticallyImplyLeading: false,
+      toolbarHeight: 24,
+      flexibleSpace: Column(
+        children: [
+          TabBar(
+            controller: _tabController,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.grey[500],
+            indicatorColor: const Color(0xFF4CAF50),
+            indicatorWeight: 2,
+            indicatorSize: TabBarIndicatorSize.label,
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            padding: EdgeInsets.zero,
+            dividerColor: Colors.transparent,
+            labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+            tabs: _tabLabels.map((label) => Tab(text: label)).toList(),
+          ),
+          Container(
+            height: 1,
+            color: const Color.fromARGB(255, 41, 41, 41),
+          ),
+        ],
       ),
     );
   }
 
-  // Tab "Tất cả" - hiển thị tất cả kết quả
+  // ============ TAB BUILDERS ============
+
+  /// Tab "Tất cả" - hiển thị tất cả kết quả theo thứ tự: Users -> Posts -> Medicines -> Dishes
   Widget _buildAllTab(SearchProvider provider) {
     if (provider.searchQuery.isEmpty) {
       return _buildRecentSearches(provider);
@@ -294,70 +227,83 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
     }
 
     return ListView(
-      padding: const EdgeInsets.only(top: 16, bottom: 32),
+      padding: const EdgeInsets.only(bottom: 32, top: 0),
       children: [
-        // Users section
+        // 1. Users section (TikTok style list)
         if (provider.results.users.isNotEmpty) ...[
           _buildSectionHeader('Người dùng', provider.results.users.length, 'users'),
-          SizedBox(
-            height: 130,
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              scrollDirection: Axis.horizontal,
-              itemCount: provider.results.users.take(10).length,
-              separatorBuilder: (context, index) => const SizedBox(width: 12),
-              itemBuilder: (context, index) => _buildUserCardHorizontal(provider.results.users[index]),
-            ),
-          ),
-          const SizedBox(height: 24),
-        ],
-        
-        // Posts section
-        if (provider.results.posts.isNotEmpty) ...[
-          _buildSectionHeader('Bài viết', provider.results.posts.length, 'posts'),
           ListView.separated(
-            padding: const EdgeInsets.only(left: 0, right: 0, top: 0, bottom: 0),
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: provider.results.posts.take(3).length,
-            separatorBuilder: (context, index) => const SizedBox(height: 1),
-            itemBuilder: (context, index) => _buildPostCardList(provider.results.posts[index]),
-          ),
-          const SizedBox(height: 24),
-        ],
-        
-        // Medicines section
-        if (provider.results.medicines.isNotEmpty) ...[
-          _buildSectionHeader('Bài thuốc', provider.results.medicines.length, 'medicines'),
-          GridView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 0.75,
-            ),
-            itemCount: provider.results.medicines.take(4).length,
-            itemBuilder: (context, index) {
-              return _buildMedicineCardGrid(provider.results.medicines[index]);
-            },
+            itemCount: provider.results.users.take(5).length,
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            itemBuilder: (context, index) => _buildUserItemTikTok(provider.results.users[index]),
           ),
           const SizedBox(height: 24),
         ],
         
-        // Dishes section
-        if (provider.results.dishes.isNotEmpty) ...[
-          _buildSectionHeader('Món ăn', provider.results.dishes.length, 'dishes'),
+        // 2. Posts section (Magazine style)
+        if (provider.results.posts.isNotEmpty) ...[
+          _buildSectionHeader('Bài viết nổi bật', provider.results.posts.length, 'posts'),
+          ListView.separated(
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: provider.results.posts.take(3).length,
+            separatorBuilder: (context, index) => Divider(height: 1, color: Colors.grey[800]),
+            itemBuilder: (context, index) => _buildPostMagazineItem(provider.results.posts[index]),
+          ),
+          const SizedBox(height: 24),
+        ],
+        
+        // 3. Medicines section (Horizontal scroll)
+        if (provider.results.medicines.isNotEmpty) ...[
+          _buildSectionHeader('Bài thuốc dân gian', provider.results.medicines.length, 'medicines'),
           SizedBox(
-            height: 170,
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: 240,
+            child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: provider.results.dishes.take(10).length,
-              separatorBuilder: (context, index) => const SizedBox(width: 12),
-              itemBuilder: (context, index) => _buildDishCardHorizontal(provider.results.dishes[index]),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: provider.results.medicines.take(8).length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: SizedBox(
+                    width: 140,
+                    child: _buildGridContentItem(
+                      provider.results.medicines[index],
+                      type: 'medicine',
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+        
+        // 4. Dishes section (Horizontal scroll)
+        if (provider.results.dishes.isNotEmpty) ...[
+          _buildSectionHeader('Món ngon mỗi ngày', provider.results.dishes.length, 'dishes'),
+          SizedBox(
+            height: 240,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: provider.results.dishes.take(8).length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: SizedBox(
+                    width: 160,
+                    child: _buildGridContentItem(
+                      provider.results.dishes[index],
+                      type: 'dish',
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -365,7 +311,7 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
     );
   }
 
-  // Tab "Người dùng"
+  /// Tab "Người dùng"
   Widget _buildUsersTab(SearchProvider provider) {
     if (provider.searchQuery.isEmpty) return _buildRecentSearches(provider);
     if (provider.isLoading) return const Center(child: CircularProgressIndicator());
@@ -373,241 +319,117 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
     if (provider.results.users.isEmpty) return _buildNoResultsState();
 
     return ListView.separated(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
       itemCount: provider.results.users.length,
-      separatorBuilder: (context, index) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Divider(
-          height: 1,
-          color: Colors.grey[800],
-        ),
-      ),
+      separatorBuilder: (context, index) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
-        final user = provider.results.users[index];
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: _buildUserCardList(user),
-        );
+        return _buildUserItemTikTok(provider.results.users[index]);
       },
     );
   }
 
-  // Tab "Bài viết"
+  /// Tab "Bài viết" với FilterBar
   Widget _buildPostsTab(SearchProvider provider) {
     if (provider.searchQuery.isEmpty) return _buildRecentSearches(provider);
     if (provider.isLoading) return const Center(child: CircularProgressIndicator());
     if (provider.errorMessage != null) return _buildErrorState(provider.errorMessage!);
     if (provider.results.posts.isEmpty) return _buildNoResultsState();
 
-    // Sort posts based on current sort option
-    List<Post> sortedPosts = List.from(provider.results.posts);
-    sortedPosts.sort((a, b) => (b.ngayDang ?? DateTime(2000)).compareTo(a.ngayDang ?? DateTime(2000)));
+    final posts = provider.filteredPosts;
 
-    // Filter posts by global date filter
-    if (_globalDateFilter != 'all') {
-      final now = DateTime.now();
-      sortedPosts = sortedPosts.where((post) {
-        if (post.ngayDang == null) return false;
-        final diff = now.difference(post.ngayDang!);
-        if (_globalDateFilter == 'today') return diff.inDays == 0;
-        if (_globalDateFilter == 'week') return diff.inDays <= 7;
-        if (_globalDateFilter == 'month') return diff.inDays <= 30;
-        if (_globalDateFilter == 'year') return diff.inDays <= 365;
-        return true;
-      }).toList();
-    }
-
-    return ListView.separated(
-      padding: const EdgeInsets.only(top: 0),
-      itemCount: sortedPosts.length,
-      separatorBuilder: (context, index) => Divider(
-        height: 1,
-        color: Colors.grey[800],
-        indent: 0,
-        endIndent: 0,
-      ),
+    return ListView.builder(
+      itemCount: posts.length + 1,
       itemBuilder: (context, index) {
-        return _buildPostCardList(sortedPosts[index]);
+        if (index == 0) {
+          return _buildFilterBar(provider, type: 'posts');
+        }
+        final postIndex = index - 1;
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildPostMagazineItem(posts[postIndex]),
+            if (postIndex < posts.length - 1)
+              Divider(height: 1, color: Colors.grey[800]),
+          ],
+        );
       },
     );
   }
 
-  // Tab "Bài thuốc"
+  /// Tab "Bài thuốc" với FilterBar
   Widget _buildMedicinesTab(SearchProvider provider) {
     if (provider.searchQuery.isEmpty) return _buildRecentSearches(provider);
     if (provider.isLoading) return const Center(child: CircularProgressIndicator());
     if (provider.errorMessage != null) return _buildErrorState(provider.errorMessage!);
     if (provider.results.medicines.isEmpty) return _buildNoResultsState();
 
-    // Filter by global date filter
-    List<Medicine> filteredMedicines = List.from(provider.results.medicines);
-    if (_globalDateFilter != 'all') {
-      final now = DateTime.now();
-      filteredMedicines = filteredMedicines.where((medicine) {
-        final diff = now.difference(medicine.ngayTao);
-        if (_globalDateFilter == 'today') return diff.inDays == 0;
-        if (_globalDateFilter == 'week') return diff.inDays <= 7;
-        if (_globalDateFilter == 'month') return diff.inDays <= 30;
-        if (_globalDateFilter == 'year') return diff.inDays <= 365;
-        return true;
-      }).toList();
-    }
+    final medicines = provider.filteredMedicines;
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 0.75,
-      ),
-      itemCount: filteredMedicines.length,
-      itemBuilder: (context, index) {
-        return _buildMedicineCardGrid(filteredMedicines[index]);
-      },
+    return ListView(
+      padding: const EdgeInsets.only(top: 0),
+      children: [
+        _buildFilterBar(provider, type: 'medicines'),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: 0.62,
+            ),
+            itemCount: medicines.length,
+            itemBuilder: (context, index) {
+              return _buildGridContentItem(medicines[index], type: 'medicine');
+            },
+          ),
+        ),
+        const SizedBox(height: 20),
+      ],
     );
   }
 
-  // Tab "Món ăn"
+  /// Tab "Món ăn" với FilterBar
   Widget _buildDishesTab(SearchProvider provider) {
     if (provider.searchQuery.isEmpty) return _buildRecentSearches(provider);
     if (provider.isLoading) return const Center(child: CircularProgressIndicator());
     if (provider.errorMessage != null) return _buildErrorState(provider.errorMessage!);
     if (provider.results.dishes.isEmpty) return _buildNoResultsState();
 
-    // Sort dishes based on current sort option
-    List<MonAn> sortedDishes = List.from(provider.results.dishes);
-    switch (_dishSortBy) {
-      case 'name_asc':
-        sortedDishes.sort((a, b) => a.ten.compareTo(b.ten));
-        break;
-      case 'name_desc':
-        sortedDishes.sort((a, b) => b.ten.compareTo(a.ten));
-        break;
-      case 'price_asc':
-        sortedDishes.sort((a, b) => (a.gia ?? 0).compareTo(b.gia ?? 0));
-        break;
-      case 'price_desc':
-        sortedDishes.sort((a, b) => (b.gia ?? 0).compareTo(a.gia ?? 0));
-        break;
-      case 'newest':
-        sortedDishes.sort((a, b) => (b.ngayTao ?? DateTime(2000)).compareTo(a.ngayTao ?? DateTime(2000)));
-        break;
-      case 'oldest':
-        sortedDishes.sort((a, b) => (a.ngayTao ?? DateTime(2000)).compareTo(b.ngayTao ?? DateTime(2000)));
-        break;
-      case 'view':
-        sortedDishes.sort((a, b) => (b.luotXem ?? 0).compareTo(a.luotXem ?? 0));
-        break;
-    }
+    final dishes = provider.filteredDishes;
 
-    // Filter by global date filter
-    if (_globalDateFilter != 'all') {
-      final now = DateTime.now();
-      sortedDishes = sortedDishes.where((dish) {
-        if (dish.ngayTao == null) return false;
-        final diff = now.difference(dish.ngayTao!);
-        if (_globalDateFilter == 'today') return diff.inDays == 0;
-        if (_globalDateFilter == 'week') return diff.inDays <= 7;
-        if (_globalDateFilter == 'month') return diff.inDays <= 30;
-        if (_globalDateFilter == 'year') return diff.inDays <= 365;
-        return true;
-      }).toList();
-    }
-
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 0.75,
-      ),
-      itemCount: sortedDishes.length,
-      itemBuilder: (context, index) {
-        return _buildDishCardHorizontal(sortedDishes[index], isGrid: true);
-      },
-    );
-  }
-
-  // ============ CARD BUILDERS ============
-  
-  /// User card horizontal with modern gradient design
-  Widget _buildUserCardHorizontal(User user) {
-    return Container(
-      width: 110,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.grey[900]!,
-            Colors.grey[850]!,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[800]!, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.4),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => UserProfileScreen(userId: user.id),
+    return ListView(
+      padding: const EdgeInsets.only(top: 0),
+      children: [
+        _buildFilterBar(provider, type: 'dishes'),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 0.65,
             ),
-          );
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Avatar with border
-              Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF4CAF50), width: 2),
-                ),
-                child: CircleAvatar(
-                  radius: 32,
-                  backgroundColor: Colors.grey[800],
-                  backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty && user.avatarUrl!.startsWith('http')
-                      ? NetworkImage(user.avatarUrl!)
-                      : const AssetImage('assets/images/avatar.jpg') as ImageProvider,
-                ),
-              ),
-              const SizedBox(height: 10),
-              // Username
-              Text(
-                user.userName,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  color: Colors.white,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-              ),
-            ],
+            itemCount: dishes.length,
+            itemBuilder: (context, index) {
+              return _buildGridContentItem(dishes[index], type: 'dish');
+            },
           ),
         ),
-      ),
+        const SizedBox(height: 20),
+      ],
     );
   }
 
-  /// User card list with modern design
-  /// User card list with 2-column layout: avatar | username + follow
-  Widget _buildUserCardList(User user) {
+  // ============ WIDGET BUILDERS ============
+
+  /// User Item - TikTok Style (Avatar tròn, Username @ Display Name, Button Follow)
+  Widget _buildUserItemTikTok(User user) {
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -617,323 +439,395 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
           ),
         );
       },
-      child: Row(
-        children: [
-          // Avatar
-          CircleAvatar(
-            radius: 26,
-            backgroundColor: Colors.grey[800],
-            backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty && user.avatarUrl!.startsWith('http')
-                ? NetworkImage(user.avatarUrl!)
-                : const AssetImage('assets/images/avatar.jpg') as ImageProvider,
-          ),
-          const SizedBox(width: 12),
-          // Username + Follow button
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  user.userName,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Colors.white,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
-                SizedBox(
-                  height: 28,
-                  child: OutlinedButton(
-                    onPressed: () {},
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color.fromARGB(255, 255, 255, 255),
-                      side: const BorderSide(color: Color.fromARGB(255, 255, 255, 255), width: 1),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    ),
-                    child: const Text(
-                      'Follow',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
-              ],
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Avatar
+            CircleAvatar(
+              radius: 24,
+              backgroundColor: Colors.grey[800],
+              backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
+                  ? NetworkImage(ImageUrlHelper.formatImageUrl(user.avatarUrl!)) as ImageProvider
+                  : const AssetImage('assets/images/avatar.jpg'),
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            
+            // User info (stacked: username on top, @displayName below)
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Username (bold, larger)
+                  Text(
+                    user.userName,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Colors.white,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  
+                  // Display Name with @ (smaller)
+                  if (user.displayName != null && user.displayName!.isNotEmpty)
+                    Text(
+                      '@ ${user.displayName}',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey[400],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    )
+                  else
+                    const SizedBox(height: 14),
+                  const SizedBox(height: 4),
+                  
+                  // Fake followers stats
+                  Row(
+                    children: [
+                      Text(
+                        '1.2K Followers',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                      Text(
+                        ' • ',
+                        style: TextStyle(color: Colors.grey[500], fontSize: 9),
+                      ),
+                      Text(
+                        '342 Following',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            
+            // Follow button (TikTok red style)
+            SizedBox(
+              height: 32,
+              child: ElevatedButton(
+                onPressed: () {
+                  // TODO: Implement follow logic
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFE2C55),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'Follow',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  /// Post card for All tab with modern Twitter-style layout
-  /// Helper to build post action button
-  /// Post card for Posts tab (full post_feed_screen.dart style)
-  Widget _buildPostCardList(Post post) {
-    final isHtml = post.noiDung.contains('<') && post.noiDung.contains('>');
-    final hasImage = post.duongDanMedia != null && post.duongDanMedia!.isNotEmpty;
+  /// Post Item - Magazine Style (Ảnh cao tới phần username, text bên trái)
+  Widget _buildPostMagazineItem(Post post) {
+    final hasImage = (post.duongDanMedia ?? '').isNotEmpty;
     
     // Strip HTML tags for preview
     String getPreview(String html) {
       final RegExp exp = RegExp(r'<[^>]*>');
       final plainText = html.replaceAll(exp, ' ');
       final cleaned = plainText.replaceAll(RegExp(r'\s+'), ' ').trim();
-      return cleaned.length > 100 ? cleaned.substring(0, 100) + '...' : cleaned;
+      return cleaned.length > 100 ? '${cleaned.substring(0, 100)}...' : cleaned;
     }
     
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: const BoxDecoration(
-        color: Colors.black,
+    final textContent = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          getPreview(post.noiDung),
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: Colors.white,
+            height: 1.3,
+          ),
+          maxLines: 4,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 6),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.favorite_border, size: 16, color: Colors.grey[500]),
+            const SizedBox(width: 4),
+            Text(
+              '${post.luotThich ?? 0}',
+              style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+            ),
+            const SizedBox(width: 12),
+            Icon(Icons.comment_outlined, size: 16, color: Colors.grey[500]),
+            const SizedBox(width: 4),
+            Text(
+              '${post.soBinhLuan ?? 0}',
+              style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+            ),
+          ],
+        ),
+      ],
+    );
+    
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PostDetailScreen(post: post),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        color: Colors.transparent,
+        child: hasImage
+          ? Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: textContent),
+                const SizedBox(width: 10),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: _buildImageWidget(post.duongDanMedia ?? ''),
+                  ),
+                ),
+              ],
+            )
+          : textContent,
       ),
-      child: InkWell(
-        onTap: () {
+    );
+  }
+
+  /// Grid Content Item (For Medicines & Dishes) - với gradient overlay
+  Widget _buildGridContentItem(dynamic item, {required String type}) {
+    final isMedicine = type == 'medicine';
+    final isDish = type == 'dish';
+    
+    String title = '';
+    String? imageUrl;
+    String? description;
+    double? price;
+    int? likes;
+    int? views;
+    
+    if (isMedicine) {
+      final medicine = item as Medicine;
+      title = medicine.ten;
+      imageUrl = medicine.image;
+      description = medicine.moTa;
+      likes = medicine.soLuotThich;
+      views = medicine.soLuotXem;
+    } else if (isDish) {
+      final dish = item as MonAn;
+      title = dish.ten;
+      imageUrl = dish.image;
+      description = dish.moTa;
+      price = dish.gia;
+      views = dish.luotXem;
+    }
+    
+    return InkWell(
+      onTap: () {
+        if (isMedicine) {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => PostDetailScreen(post: post),
+              builder: (context) => BaiThuocDetailScreen(baiThuocId: (item as Medicine).id),
             ),
           );
-        },
-        child: Row(
+        } else if (isDish) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MonAnDetailScreen(monAn: item as MonAn),
+            ),
+          );
+        }
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey[900],
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Avatar or Image thumbnail (60x60)
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: Colors.grey[800],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: hasImage
-                    ? _buildImageWidget(post.duongDanMedia!)
-                    : (post.authorAvatar != null && post.authorAvatar!.isNotEmpty
-                        ? _buildImageWidget(post.authorAvatar!)
-                        : Icon(
-                            Icons.person_rounded,
-                            color: Colors.grey[600],
-                            size: 32,
-                          )),
-              ),
+            // Image with overlay (Stack with gradient overlay)
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  child: AspectRatio(
+                    aspectRatio: 1.0, // Square image
+                    child: imageUrl != null && imageUrl.isNotEmpty
+                        ? _buildImageWidget(imageUrl)
+                        : Container(
+                            color: Colors.grey[800],
+                            child: Icon(
+                              isMedicine ? Icons.medical_services_rounded : Icons.restaurant,
+                              color: const Color(0xFF4CAF50),
+                              size: 40,
+                            ),
+                          ),
+                  ),
+                ),
+                
+                // Gradient overlay từ ảnh xuống content
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                    child: Container(
+                      height: 80,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.8),
+                            Colors.black.withValues(alpha: 0.4),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                
+                // Heart button (top right)
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.favorite_border,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ),
+                ),
+                
+                // Price tag (bottom left) - for dishes only
+                if (isDish && price != null)
+                  Positioned(
+                    bottom: 6,
+                    left: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFC107),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '${_priceFormatter.format(price.toInt())}₫',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
-            const SizedBox(width: 12),
-            // Content
-            Expanded(
+            
+            // Content (minimal padding)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(6, 6, 6, 4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Author info
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          post.authorName,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(
-                        _formatPostDate(post.ngayDang),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[500],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  // Preview (HTML stripped)
+                  // Title
                   Text(
-                    isHtml ? getPreview(post.noiDung) : post.noiDung,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[300],
-                      height: 1.4,
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                      color: Colors.white,
+                      height: 1.2,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Medicine card with user_profile_screen.dart style - horizontal layout
-  /// Medicine card grid style (like dish cards but with description instead of price)
-  Widget _buildMedicineCardGrid(Medicine medicine) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[900],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => BaiThuocDetailScreen(baiThuocId: medicine.id),
-            ),
-          );
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: AspectRatio(
-                aspectRatio: 1.5,
-                child: medicine.image != null && medicine.image!.isNotEmpty
-                    ? _buildImageWidget(medicine.image!)
-                    : Container(
-                        color: Colors.grey[800],
-                        child: Icon(
-                          Icons.medical_services_rounded,
-                          color: const Color(0xFF4CAF50),
-                          size: 48,
-                        ),
-                      ),
-              ),
-            ),
-            // Content
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title
-                  Text(
-                    medicine.ten,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  // Description
-                  if (medicine.moTa.isNotEmpty)
+                  
+                  // Description (up to 3 lines)
+                  if (description != null && description.isNotEmpty) ...[
+                    const SizedBox(height: 3),
                     Text(
-                      medicine.moTa,
+                      description,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey[400],
-                        height: 1.3,
+                        color: Colors.grey[500],
+                        height: 1.2,
                       ),
-                      maxLines: 2,
+                      maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  const SizedBox(height: 6),
-                  // Stats
-                  Row(
-                    children: [
-                      Icon(Icons.favorite_outline, color: Colors.grey[500], size: 12),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${medicine.soLuotThich}',
-                        style: TextStyle(color: Colors.grey[500], fontSize: 11),
-                      ),
-                      const SizedBox(width: 12),
-                      Icon(Icons.visibility_outlined, color: Colors.grey[500], size: 12),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${medicine.soLuotXem}',
-                        style: TextStyle(color: Colors.grey[500], fontSize: 11),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Dish card horizontal
-  Widget _buildDishCardHorizontal(MonAn dish, {bool isGrid = false}) {
-    return Container(
-      width: isGrid ? double.infinity : 160,
-      decoration: BoxDecoration(
-        color: Colors.grey[900],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MonAnDetailScreen(monAn: dish),
-            ),
-          );
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: AspectRatio(
-                aspectRatio: 1.5,
-                child: _buildImageWidget(dish.image ?? ''),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    dish.ten,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  // Price with proper formatting
-                  Text(
-                    dish.gia != null ? '${_priceFormatter.format(dish.gia!.toInt())}₫' : 'Liên hệ',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFFFFC107),
-                    ),
-                  ),
-                  if (isGrid && dish.moTa != null && dish.moTa!.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      dish.moTa!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[400],
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                  ],
+                  
+                  // Stats (compact)
+                  if (likes != null || views != null) ...[
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        if (likes != null) ...[
+                          Icon(Icons.favorite_outline, color: Colors.grey[500], size: 10),
+                          const SizedBox(width: 2),
+                          Text(
+                            '$likes',
+                            style: TextStyle(color: Colors.grey[500], fontSize: 9),
+                          ),
+                          const SizedBox(width: 6),
+                        ],
+                        if (views != null) ...[
+                          Icon(Icons.visibility_outlined, color: Colors.grey[500], size: 10),
+                          const SizedBox(width: 2),
+                          Text(
+                            '$views',
+                            style: TextStyle(color: Colors.grey[500], fontSize: 9),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
                 ],
@@ -945,9 +839,84 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
     );
   }
 
+  /// Filter Bar với các ChoiceChip/Buttons
+  Widget _buildFilterBar(SearchProvider provider, {required String type}) {
+    List<Map<String, String>> filters = [];
+    
+    if (type == 'posts') {
+      filters = [
+        {'label': 'Mặc định', 'value': 'default'},
+        {'label': 'Mới nhất', 'value': 'newest'},
+        {'label': 'Nhiều thích', 'value': 'likes'},
+      ];
+    } else if (type == 'medicines') {
+      filters = [
+        {'label': 'Mặc định', 'value': 'default'},
+        {'label': 'Mới nhất', 'value': 'newest'},
+        {'label': 'Nhiều thích', 'value': 'likes'},
+        {'label': 'Nhiều xem', 'value': 'views'},
+      ];
+    } else if (type == 'dishes') {
+      filters = [
+        {'label': 'Mặc định', 'value': 'default'},
+        {'label': 'Giá tăng', 'value': 'price_asc'},
+        {'label': 'Giá giảm', 'value': 'price_desc'},
+        {'label': 'Mới nhất', 'value': 'newest'},
+        {'label': 'Nhiều xem', 'value': 'views'},
+      ];
+    } else if (type == 'all' || type == 'users') {
+      // No filters for All and Users tabs
+      return const SizedBox(height: 0);
+    }
+    
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+      child: Row(
+        children: [
+          for (int index = 0; index < filters.length; index++)
+            _buildFilterChip(filters[index], provider, index),
+        ],
+      ),
+    );
+  }
+
+  /// Helper to build individual filter chip
+  Widget _buildFilterChip(Map<String, String> filter, SearchProvider provider, int index) {
+    final isSelected = provider.sortOption == filter['value'];
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      child: FilterChip(
+        label: Text(
+          filter['label']!,
+          style: const TextStyle(fontSize: 12),
+        ),
+        selected: isSelected,
+        onSelected: (selected) {
+          if (selected) {
+            provider.setSort(filter['value']!);
+          }
+        },
+        showCheckmark: false,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        backgroundColor: Colors.black,
+        selectedColor: const Color(0xFF3b4b38),
+        side: BorderSide(
+          color: isSelected ? const Color(0xFF3b4b38) : const Color(0xFF3b4b38),
+          width: 1,
+        ),
+        labelStyle: TextStyle(
+          color: isSelected ? Colors.white : Colors.grey[400],
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
   // ============ HELPER WIDGETS ============
 
-  /// Build image widget with proper error handling (like post_feed_screen.dart)
+  /// Build image widget với ImageUrlHelper
   Widget _buildImageWidget(String mediaUrl) {
     if (mediaUrl.isEmpty) {
       return Container(
@@ -966,19 +935,11 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
           errorBuilder: (context, error, stackTrace) => _buildImageError(),
         );
       }
-      // Handle relative URLs (with /upload/)
-      else if (mediaUrl.startsWith('/upload/')) {
-        final fullUrl = 'https://192.168.1.3:7135$mediaUrl';
-        return Image.network(
-          fullUrl,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => _buildImageError(),
-        );
-      }
-      // Handle full URLs
+      // Use ImageUrlHelper for all other images
       else {
+        final formattedUrl = ImageUrlHelper.formatImageUrl(mediaUrl);
         return Image.network(
-          mediaUrl,
+          formattedUrl,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) => _buildImageError(),
         );
@@ -1026,10 +987,10 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
                 _tabController.animateTo(index);
               }
             },
-            child: const Text(
+            child: Text(
               'Xem thêm',
               style: TextStyle(
-                color: Colors.white70,
+                color: Colors.grey[400],
                 fontSize: 14,
               ),
             ),
@@ -1058,7 +1019,7 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
     }
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16).copyWith(top: 0),
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1141,51 +1102,6 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
         ],
       ),
     );
-  }
-
-  // Helper method to format post date
-  String _formatPostDate(DateTime? date) {
-    if (date == null) return '';
-    final now = DateTime.now();
-    final diff = now.difference(date);
-
-    if (diff.inSeconds < 60) {
-      return 'Vừa xong';
-    } else if (diff.inMinutes < 60) {
-      return '${diff.inMinutes}m';
-    } else if (diff.inHours < 24) {
-      return '${diff.inHours}h';
-    } else if (diff.inDays < 7) {
-      return '${diff.inDays}d';
-    } else {
-      return DateFormat('MMM d').format(date);
-    }
-  }
-}
-
-/// Delegate for pinned TabBar
-class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
-  _SliverTabBarDelegate(this._tabBar);
-  
-  final TabBar _tabBar;
-
-  @override
-  double get minExtent => _tabBar.preferredSize.height;
-
-  @override
-  double get maxExtent => _tabBar.preferredSize.height;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      color: Colors.black,
-      child: _tabBar,
-    );
-  }
-
-  @override
-  bool shouldRebuild(_SliverTabBarDelegate oldDelegate) {
-    return false;
   }
 }
 

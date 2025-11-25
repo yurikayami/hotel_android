@@ -951,7 +951,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
               const Center(child: Icon(Icons.broken_image_outlined)),
         );
       } else if (mediaUrl.startsWith('/upload/')) {
-        final fullUrl = 'https://192.168.1.3:7135$mediaUrl';
+        final fullUrl = 'https://10.227.9.96:7135$mediaUrl';
         return Image.network(
           fullUrl,
           fit: BoxFit.cover,
@@ -1227,7 +1227,7 @@ class _UserProfilePostCardState extends State<UserProfilePostCard> {
           },
         );
       } else if (mediaUrl.startsWith('/upload/')) {
-        final fullUrl = 'https://192.168.1.3:7135$mediaUrl';
+        final fullUrl = 'https://10.227.9.96:7135$mediaUrl';
         return Image.network(
           fullUrl,
           fit: BoxFit.cover,

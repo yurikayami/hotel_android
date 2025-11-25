@@ -1,8 +1,8 @@
 /// API Configuration
 class ApiConfig {
   // Base URL - Update this to match your API server
-  // Backend running on: https://192.168.1.3:7135
-  static const String baseUrl = 'https://192.168.1.3:7135/api';
+  // Backend running on: https://10.227.9.96:7135
+  static const String baseUrl = 'https://10.227.9.96:7135/api';
 
   // Endpoints
   static const String auth = '/Auth';

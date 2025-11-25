@@ -84,35 +84,101 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
-    return SliverAppBar(
-      pinned: true,
-      floating: true,
-      snap: true,
-      elevation: 0,
-      backgroundColor: Theme.of(
-        context,
-      ).colorScheme.surface.withValues(alpha: 0.95),
-      surfaceTintColor: Colors.transparent,
-      title: const Text(
-        'Dành cho bạn',
-        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+Widget _buildAppBar(BuildContext context) {
+  final colorScheme = Theme.of(context).colorScheme;
+
+  return SliverAppBar(
+    // --- CẤU HÌNH STICKY ---
+    pinned: true,      // Giữ thanh này dính ở trên cùng khi cuộn
+    floating: true,    // Cho phép hiện lại ngay khi vuốt nhẹ lên
+    snap: true,        // Hiệu ứng hiện nhanh
+    // -----------------------
+
+    elevation: 0,
+    backgroundColor: colorScheme.surface.withValues(alpha: 0.95),
+    surfaceTintColor: Colors.transparent,
+    
+    // THAY THẾ 'bottom' BẰNG 'shape' ĐỂ VẼ VIỀN DƯỚI
+    // Cách này không làm thay đổi chiều cao logic của AppBar, giúp sticky hoạt động đúng
+    shape: Border(
+      bottom: BorderSide(
+        color: Colors.grey.withValues(alpha: 0.2), // Màu viền xám nhạt
+        width: 1.0, // Độ dày 1px
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.search_rounded),
-          onPressed: () {
-            Navigator.push(
+    ),
+
+    centerTitle: false, 
+    
+    // Tiêu đề 2 dòng
+    title: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Sống Khỏe', 
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 22, 
+            color: colorScheme.primary, 
+          ),
+        ),
+        Text(
+          'Dành cho bạn', 
+          style: TextStyle(
+            fontWeight: FontWeight.w400,
+            fontSize: 13, 
+            color: colorScheme.onSurface.withValues(alpha: 0.6), 
+          ),
+        ),
+      ],
+    ),
+
+    // Các nút bên phải
+    actions: [
+      _buildCircleActionButton(
+        context,
+        icon: Icons.search_rounded,
+        onPressed: () {
+          Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => const GeneralSearchScreen(),
               ),
             );
-          },
-        ),
-      ],
-    );
-  }
+        },
+      ),
+      
+      const SizedBox(width: 8),
+
+      Stack(
+        children: [
+          _buildCircleActionButton(
+            context,
+            icon: Icons.notifications_outlined,
+            onPressed: () {},
+          ),
+        ],
+      ),
+      const SizedBox(width: 16),
+    ],
+    // LƯU Ý: ĐÃ XÓA PHẦN 'bottom: PreferredSize...' ĐỂ TRÁNH LỖI
+  );
+}
+
+// Widget con để vẽ cái nút tròn xám cho gọn code
+Widget _buildCircleActionButton(BuildContext context, {required IconData icon, required VoidCallback onPressed}) {
+  return Container(
+    margin: const EdgeInsets.symmetric(vertical: 8), // Căn giữa theo chiều dọc
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5), // Màu nền tròn xám nhẹ
+      shape: BoxShape.circle,
+    ),
+    child: IconButton(
+      icon: Icon(icon, size: 24),
+      color: Theme.of(context).colorScheme.onSurface,
+      onPressed: onPressed,
+    ),
+  );
+}
 
   Widget _buildPostList(PostProvider postProvider) {
     if (postProvider.posts.isEmpty) {
@@ -208,6 +274,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
         ],
       ),
       child: FloatingActionButton.extended(
+        heroTag: 'post_feed_fab',
         onPressed: () async {
           final result = await Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => const CreatePostScreen()),
@@ -299,7 +366,9 @@ class _PostCardState extends State<PostCard> {
           CircleAvatar(
             radius: 20,
             backgroundColor: colorScheme.primaryContainer,
-            backgroundImage: post.authorAvatar != null && post.authorAvatar!.startsWith('http')
+            backgroundImage:
+                post.authorAvatar != null &&
+                    post.authorAvatar!.startsWith('http')
                 ? NetworkImage(post.authorAvatar!)
                 : const AssetImage('assets/images/avatar.jpg') as ImageProvider,
           ),
@@ -465,7 +534,7 @@ class _PostCardState extends State<PostCard> {
           },
         );
       } else if (mediaUrl.startsWith('/upload/')) {
-        final fullUrl = 'https://192.168.1.3:7135$mediaUrl';
+        final fullUrl = 'https://10.227.9.96:7135$mediaUrl';
         return Image.network(
           fullUrl,
           fit: BoxFit.cover,
@@ -728,7 +797,10 @@ class _PostCardState extends State<PostCard> {
                   }
                 } catch (e) {
                   if (mounted) {
-                    String errorMsg = e.toString().replaceAll('Exception: ', '');
+                    String errorMsg = e.toString().replaceAll(
+                      'Exception: ',
+                      '',
+                    );
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(errorMsg),
@@ -747,4 +819,3 @@ class _PostCardState extends State<PostCard> {
     );
   }
 }
-

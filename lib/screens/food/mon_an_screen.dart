@@ -37,7 +37,8 @@ class _MonAnScreenState extends State<MonAnScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.8) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.8) {
       context.read<MonAnProvider>().loadMore();
     }
   }
@@ -60,52 +61,71 @@ class _MonAnScreenState extends State<MonAnScreen> {
           return CustomScrollView(
             controller: _scrollController,
             slivers: [
-              // Header
+              // Header + Search bar sticky
               SliverAppBar(
-                floating: true,
-                snap: true,
+                pinned: true,
+                floating: false,
+                snap: false,
                 elevation: 0,
                 backgroundColor: colorScheme.surface,
-                title: Text(
-                  'Món ăn',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-              ),
-              // Search bar với filter/sort integrated
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 3, 16, 8),
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (value) => provider.search(value),
-                    decoration: InputDecoration(
-                      hintText: 'Tìm kiếm món ăn...',
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: _searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                _searchController.clear();
-                                provider.search('');
-                              },
-                            )
-                          : null,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                toolbarHeight: 96, // 40 (title) + 8 (spacing) + 48 (search)
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Món ăn',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
+                        fontSize: 22,
                       ),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 40,
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (value) => provider.search(value),
+                        decoration: InputDecoration(
+                          hintText: 'Tìm kiếm món ăn...',
+                          prefixIcon: const Icon(Icons.search, size: 20),
+                          suffixIcon: _searchController.text.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear, size: 18),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    provider.search('');
+                                  },
+                                )
+                              : null,
+                          isDense: true,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(
+                              color: colorScheme.outline.withOpacity(0.3),
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 0,
+                          ),
+                        ),
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              // Filter tabs + Sort button in one row
-              SliverToBoxAdapter(
-                child: Container(
-                  height: 44,
+              // Filter tabs + Sort button sticky
+              SliverAppBar(
+                pinned: true,
+                floating: false,
+                snap: false,
+                elevation: 0,
+                backgroundColor: colorScheme.surface,
+                toolbarHeight: 12,
+                flexibleSpace: Container(
+                  height: 40,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Row(
                     children: [
@@ -118,7 +138,10 @@ class _MonAnScreenState extends State<MonAnScreen> {
                             Padding(
                               padding: const EdgeInsets.only(right: 6),
                               child: FilterChip(
-                                label: Text('Tất cả', style: TextStyle(fontSize: 12)),
+                                label: Text(
+                                  'Tất cả',
+                                  style: TextStyle(fontSize: 12),
+                                ),
                                 selected: provider.selectedLoai == null,
                                 onSelected: (_) => provider.filterByLoai(null),
                                 showCheckmark: false,
@@ -130,9 +153,13 @@ class _MonAnScreenState extends State<MonAnScreen> {
                               return Padding(
                                 padding: const EdgeInsets.only(right: 6),
                                 child: FilterChip(
-                                  label: Text(loai, style: TextStyle(fontSize: 12)),
+                                  label: Text(
+                                    loai,
+                                    style: TextStyle(fontSize: 12),
+                                  ),
                                   selected: provider.selectedLoai == loai,
-                                  onSelected: (_) => provider.filterByLoai(loai),
+                                  onSelected: (_) =>
+                                      provider.filterByLoai(loai),
                                   showCheckmark: false,
                                   padding: EdgeInsets.symmetric(horizontal: 8),
                                 ),
@@ -153,7 +180,8 @@ class _MonAnScreenState extends State<MonAnScreen> {
                         tooltip: 'Sắp xếp',
                       ),
                       // Reset button
-                      if (provider.selectedLoai != null || provider.sortBy != SortBy.tenAZ)
+                      if (provider.selectedLoai != null ||
+                          provider.sortBy != SortBy.tenAZ)
                         IconButton(
                           icon: Icon(Icons.refresh, size: 20),
                           onPressed: () => provider.resetFilters(),
@@ -176,7 +204,9 @@ class _MonAnScreenState extends State<MonAnScreen> {
                           Container(
                             padding: const EdgeInsets.all(24),
                             decoration: BoxDecoration(
-                              color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+                              color: colorScheme.primaryContainer.withValues(
+                                alpha: 0.3,
+                              ),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -210,7 +240,10 @@ class _MonAnScreenState extends State<MonAnScreen> {
                 )
               else
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   sliver: SliverGrid.count(
                     crossAxisCount: 2,
                     mainAxisSpacing: 12,
@@ -266,74 +299,74 @@ class _MonAnScreenState extends State<MonAnScreen> {
               ClipRRect(
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+                child: AspectRatio(
+                  aspectRatio: 1.5, // Landscape image (3:2)
+                  child: _buildDishImage(mon.image),
+                ),
               ),
-              child: AspectRatio(
-                aspectRatio: 1.5, // Landscape image (3:2)
-                child: _buildDishImage(mon.image),
-              ),
-            ),
-            // Content
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Name
-                  Text(
-                    mon.ten,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  // Price
-                  if (mon.gia != null)
+              // Content
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Name
                     Text(
-                      '${_priceFormatter.format(mon.gia!.toInt())}₫',
-                      style: TextStyle(
-                        color: colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 11,
+                      mon.ten,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
                       ),
                     ),
-                  const SizedBox(height: 3),
-                  // Category & Servings - Compact row
-                  Row(
-                    children: [
-                      if (mon.loai != null)
-                        Expanded(
-                          child: Text(
-                            mon.loai!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                    const SizedBox(height: 2),
+                    // Price
+                    if (mon.gia != null)
+                      Text(
+                        '${_priceFormatter.format(mon.gia!.toInt())}₫',
+                        style: TextStyle(
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 11,
+                        ),
+                      ),
+                    const SizedBox(height: 3),
+                    // Category & Servings - Compact row
+                    Row(
+                      children: [
+                        if (mon.loai != null)
+                          Expanded(
+                            child: Text(
+                              mon.loai!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 9,
+                                color: colorScheme.outline,
+                              ),
+                            ),
+                          ),
+                        if (mon.soNguoi != null && mon.soNguoi! > 0)
+                          Text(
+                            'số người: ${mon.soNguoi}',
                             style: TextStyle(
                               fontSize: 9,
                               color: colorScheme.outline,
                             ),
                           ),
-                        ),
-                      if (mon.soNguoi != null && mon.soNguoi! > 0)
-                        Text(
-                          'số người: ${mon.soNguoi}',
-                          style: TextStyle(
-                            fontSize: 9,
-                            color: colorScheme.outline,
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 
@@ -342,11 +375,7 @@ class _MonAnScreenState extends State<MonAnScreen> {
       return Container(
         color: Colors.grey.shade200,
         child: Center(
-          child: Icon(
-            Icons.restaurant,
-            size: 48,
-            color: Colors.grey.shade400,
-          ),
+          child: Icon(Icons.restaurant, size: 48, color: Colors.grey.shade400),
         ),
       );
     }
@@ -421,11 +450,7 @@ class _MonAnScreenState extends State<MonAnScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 64,
-            color: colorScheme.error,
-          ),
+          Icon(Icons.error_outline, size: 64, color: colorScheme.error),
           const SizedBox(height: 16),
           Text(
             'Lỗi',
@@ -568,9 +593,7 @@ class _MonAnScreenState extends State<MonAnScreen> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.1),
-        ),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -625,4 +648,3 @@ class _MonAnScreenState extends State<MonAnScreen> {
     );
   }
 }
-

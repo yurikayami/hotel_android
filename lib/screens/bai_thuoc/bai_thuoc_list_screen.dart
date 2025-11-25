@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import '../../providers/bai_thuoc_provider.dart';
 import '../../models/bai_thuoc.dart';
 import '../../utils/image_url_helper.dart';
@@ -223,160 +222,203 @@ class _BaiThuocListScreenState extends State<BaiThuocListScreen> {
   Widget _buildBaiThuocCard(BaiThuoc baiThuoc) {
     final colorScheme = Theme.of(context).colorScheme;
     
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BaiThuocDetailScreen(baiThuocId: baiThuoc.id),
-          ),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header with author info
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Author avatar
-                if (baiThuoc.authorAvatar != null && baiThuoc.authorAvatar!.isNotEmpty)
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundImage: NetworkImage(
-                      ImageUrlHelper.formatImageUrl(baiThuoc.authorAvatar),
-                    ),
-                  )
-                else
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: colorScheme.primaryContainer,
-                    child: Icon(
-                      Icons.person,
-                      size: 20,
-                      color: colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                const SizedBox(width: 12),
-                
-                // Author name and date
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        baiThuoc.authorName ?? 'Ẩn danh',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
-                        _formatDate(baiThuoc.ngayTao),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Title
-            Text(
-              baiThuoc.ten,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 8),
-
-            // Description
-            if (baiThuoc.moTa != null && baiThuoc.moTa!.isNotEmpty)
-              Text(
-                baiThuoc.moTa!,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: colorScheme.onSurfaceVariant,
-                  height: 1.4,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            const SizedBox(height: 12),
-
-            // Image if available
-            if (baiThuoc.image != null && baiThuoc.image!.isNotEmpty)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: _buildImageWidget(baiThuoc.image, 200),
-              ),
-            
-            if (baiThuoc.image != null && baiThuoc.image!.isNotEmpty)
-              const SizedBox(height: 12),
-
-            // Stats row
-            Row(
-              children: [
-                _buildStatButton(
-                  Icons.favorite_outline,
-                  _formatCount(baiThuoc.soLuotThich ?? 0),
-                  Colors.red,
-                  colorScheme,
-                ),
-                const SizedBox(width: 16),
-                _buildStatButton(
-                  Icons.visibility_outlined,
-                  _formatCount(baiThuoc.soLuotXem ?? 0),
-                  colorScheme.primary,
-                  colorScheme,
-                ),
-                const Spacer(),
-                Icon(
-                  Icons.share_outlined,
-                  size: 18,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatButton(
-    IconData icon,
-    String count,
-    Color color,
-    ColorScheme colorScheme,
-  ) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: () {},
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BaiThuocDetailScreen(baiThuocId: baiThuoc.id),
+            ),
+          );
+        },
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: colorScheme.outline.withValues(alpha: 0.15),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: colorScheme.shadow.withValues(alpha: 0.08),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 16, color: color),
-              const SizedBox(width: 4),
-              Text(
-                count,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: color,
-                  fontWeight: FontWeight.w500,
+              // Image - left side (square 1:1 aspect ratio)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                  child: SizedBox(
+                  width: 140,
+                  height: 140,
+                  child: baiThuoc.image != null && baiThuoc.image!.isNotEmpty
+                      ? _buildImageWidget(baiThuoc.image, 300)
+                      : Container(
+                          color: colorScheme.surfaceContainerHighest,
+                          child: Icon(
+                            Icons.image_outlined,
+                            size: 40,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                ),
+              ),
+              // Content - right side
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Title + Description
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Category badge with read time
+                          Row(
+                            children: [
+                              // Badge
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF0A2A18), // Dark green
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                child: const Text(
+                                  'BÀI THUỐC',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              // Read time
+                              Text(
+                                '3 phút đọc',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          // Title
+                          Text(
+                            baiThuoc.ten,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              height: 1.3,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          // Description - 3 lines
+                          if (baiThuoc.moTa != null && baiThuoc.moTa!.isNotEmpty)
+                            Text(
+                              baiThuoc.moTa!,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: colorScheme.onSurfaceVariant,
+                                height: 1.3,
+                              ),
+                            ),
+                        ],
+                      ),
+                      // Author + Stats footer
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 4),
+                          // Author info + Stats in one row
+                          Row(
+                            children: [
+                              // Author avatar - smaller
+                              if (baiThuoc.authorAvatar != null && baiThuoc.authorAvatar!.isNotEmpty)
+                                CircleAvatar(
+                                  radius: 10,
+                                  backgroundImage: NetworkImage(
+                                    ImageUrlHelper.formatImageUrl(baiThuoc.authorAvatar),
+                                  ),
+                                )
+                              else
+                                CircleAvatar(
+                                  radius: 10,
+                                  backgroundColor: colorScheme.primaryContainer,
+                                  child: Icon(
+                                    Icons.person,
+                                    size: 8,
+                                    color: colorScheme.onPrimaryContainer,
+                                  ),
+                                ),
+                              const SizedBox(width: 4),
+                              // Author name - smaller
+                              Expanded(
+                                child: Text(
+                                  baiThuoc.authorName ?? 'Dr. Herbal',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              // Views stat
+                              Icon(
+                                Icons.visibility_outlined,
+                                size: 10,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                _formatCount(baiThuoc.soLuotXem ?? 0),
+                                style: TextStyle(
+                                  fontSize: 8,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              // Likes stat
+                              Icon(
+                                Icons.favorite_outline,
+                                size: 10,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                _formatCount(baiThuoc.soLuotThich ?? 0),
+                                style: TextStyle(
+                                  fontSize: 8,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -393,23 +435,6 @@ class _BaiThuocListScreenState extends State<BaiThuocListScreen> {
       return '${(count / 1000).toStringAsFixed(1)}K';
     }
     return count.toString();
-  }
-
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final diff = now.difference(date);
-
-    if (diff.inSeconds < 60) {
-      return 'Vừa xong';
-    } else if (diff.inMinutes < 60) {
-      return '${diff.inMinutes}m';
-    } else if (diff.inHours < 24) {
-      return '${diff.inHours}h';
-    } else if (diff.inDays < 7) {
-      return '${diff.inDays}d';
-    } else {
-      return DateFormat('MMM d').format(date);
-    }
   }
 
   Widget _buildEmptyView() {

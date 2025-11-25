@@ -33,4 +33,3 @@ Map<String, dynamic> _$MonAnToJson(MonAn instance) => <String, dynamic>{
   'soNguoi': instance.soNguoi,
   'luotXem': instance.luotXem,
 };
-

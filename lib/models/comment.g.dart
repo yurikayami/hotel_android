@@ -31,4 +31,3 @@ Map<String, dynamic> _$CommentToJson(Comment instance) => <String, dynamic>{
   'userAvatar': instance.userAvatar,
   'replies': instance.replies,
 };
-
