@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../models/post.dart';
 import '../../providers/post_provider.dart';
+import '../../services/api_config.dart';
 import '../../widgets/html_content_viewer.dart';
 import '../profile/user_profile_screen.dart';
 
@@ -439,7 +440,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       }
       // Check if it's a relative path (starts with /upload/)
       else if (mediaUrl.startsWith('/upload/')) {
-        final fullUrl = 'https://10.227.9.96:7135$mediaUrl';
+        final fullUrl = '${ApiConfig.baseUrl}$mediaUrl';
         return Container(
           width: double.infinity,
           constraints: const BoxConstraints(maxHeight: 400, minHeight: 200),

@@ -32,7 +32,7 @@ Avatar của người dùng và tác giả bài viết không hiển thị trong
 String _normalizeAvatarUrl(String? url) {
   if (url == null || url.isEmpty) return '';
   if (url.startsWith('http')) return url;  // Full URL
-  if (url.startsWith('/')) return 'https://10.227.9.96:7135$url';  // Relative URL
+  if (url.startsWith('/')) return 'https://192.168.1.3:7135$url';  // Relative URL
   return url;  // Other cases
 }
 
@@ -109,11 +109,11 @@ Sử dụng Postman hoặc curl để kiểm tra API:
 
 ```bash
 # Test search users
-curl -X GET "https://10.227.9.96:7135/api/search?q=ngocphuc&type=users" \
+curl -X GET "https://192.168.1.3:7135/api/search?q=ngocphuc&type=users" \
   -H "Content-Type: application/json"
 
 # Test search posts
-curl -X GET "https://10.227.9.96:7135/api/search?q=test&type=posts" \
+curl -X GET "https://192.168.1.3:7135/api/search?q=test&type=posts" \
   -H "Content-Type: application/json"
 ```
 
@@ -146,7 +146,7 @@ Widget _buildAvatarImage(String? avatarUrl) {
 
   // Handle relative URLs
   if (avatarUrl.startsWith('/')) {
-    return NetworkImage('https://10.227.9.96:7135$avatarUrl');
+    return NetworkImage('https://192.168.1.3:7135$avatarUrl');
   }
 
   // Handle full URLs
@@ -209,7 +209,7 @@ class SearchProvider extends ChangeNotifier {
   String _normalizeAvatarUrl(String? url) {
     if (url == null || url.isEmpty) return '';
     if (url.startsWith('http')) return url;
-    if (url.startsWith('/')) return 'https://10.227.9.96:7135$url';
+    if (url.startsWith('/')) return 'https://192.168.1.3:7135$url';
     return url;
   }
 
@@ -448,12 +448,12 @@ flutter run --debug
 ### API Testing
 ```bash
 # Test search API
-curl -X GET "https://10.227.9.96:7135/api/search?q=test&type=users" \
+curl -X GET "https://192.168.1.3:7135/api/search?q=test&type=users" \
   -H "Content-Type: application/json" \
   -v
 
 # Check response format
-curl -X GET "https://10.227.9.96:7135/api/search?q=test&type=posts" \
+curl -X GET "https://192.168.1.3:7135/api/search?q=test&type=posts" \
   -H "Content-Type: application/json" | jq .
 ```
 

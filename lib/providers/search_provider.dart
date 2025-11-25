@@ -5,6 +5,7 @@ import '../models/post.dart';
 import '../models/mon_an.dart';
 import '../models/user.dart';
 import '../models/medicine.dart';
+import '../services/api_config.dart';
 
 /// Model để hold search results từ tất cả các loại
 class SearchResults {
@@ -198,7 +199,7 @@ class SearchProvider with ChangeNotifier {
     try {
       // Gọi API tổng quát - dùng queryParameters để encode đúng
       final Uri uri = Uri.https(
-        '10.227.9.96:7135',
+        ApiConfig.ipComputer,
         '/api/search',
         {
           'query': query,
@@ -390,7 +391,7 @@ class SearchProvider with ChangeNotifier {
 
     try {
       final Uri uri = Uri.https(
-        '10.227.9.96:7135',
+        ApiConfig.ipComputer,
         '/api/search/suggestions',
         {
           'query': query,

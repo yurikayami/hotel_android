@@ -60,8 +60,8 @@ Tự động gọi API từ `SearchProvider`:
 
 ```dart
 // API endpoint (được config sẵn)
-GET https://10.227.9.96:7135/api/search?q={query}&type={type}&page=1&limit=20
-GET https://10.227.9.96:7135/api/search/suggestions?q={query}&type={type}&limit=10
+GET https://192.168.1.3:7135/api/search?q={query}&type={type}&page=1&limit=20
+GET https://192.168.1.3:7135/api/search/suggestions?q={query}&type={type}&limit=10
 ```
 
 ## 🎨 UI Components
@@ -130,7 +130,7 @@ GET https://10.227.9.96:7135/api/search/suggestions?q={query}&type={type}&limit=
 File: `lib/providers/search_provider.dart`
 
 ```dart
-const String BASE_URL = 'https://10.227.9.96:7135/api';
+const String BASE_URL = 'https://192.168.1.3:7135/api';
 
 // Cập nhật URL này thành API server thực tế
 final Uri uri = Uri.parse('$BASE_URL/search?q=$query&type=$_selectedType&page=1&limit=20');
@@ -304,7 +304,7 @@ import '../search/general_search_screen.dart';
 
 ### Issue: API timeout
 **Giải pháp**: Kiểm tra:
-1. URL base: `https://10.227.9.96:7135`
+1. URL base: `https://192.168.1.3:7135`
 2. Kết nối mạng
 3. Backend đang chạy
 

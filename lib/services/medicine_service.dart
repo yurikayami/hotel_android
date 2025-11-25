@@ -3,8 +3,10 @@ import 'dart:convert';
 import '../models/medicine.dart';
 
 /// Service for handling Medicine/Health Tips API calls
+import '../services/api_config.dart';
+
 class MedicineService {
-  static const String baseUrl = 'https://10.227.9.96:7135';
+  static const String baseUrl = '${ApiConfig.baseUrl}/Medicine';
 
   /// Get public medicines for a specific user
   static Future<List<Medicine>> getPublicMedicines(

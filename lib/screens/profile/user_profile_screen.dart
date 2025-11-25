@@ -7,6 +7,7 @@ import '../../models/medicine.dart';
 import '../../providers/user_provider.dart';
 import '../../services/comment_service.dart';
 import '../../services/medicine_service.dart';
+import '../../services/api_config.dart';
 import '../posts/post_detail_screen.dart';
 import '../bai_thuoc/bai_thuoc_detail_screen.dart';
 import '../../widgets/html_content_viewer.dart';
@@ -951,7 +952,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
               const Center(child: Icon(Icons.broken_image_outlined)),
         );
       } else if (mediaUrl.startsWith('/upload/')) {
-        final fullUrl = 'https://10.227.9.96:7135$mediaUrl';
+        final fullUrl = '${ApiConfig.baseUrl}$mediaUrl';
         return Image.network(
           fullUrl,
           fit: BoxFit.cover,
@@ -1227,7 +1228,7 @@ class _UserProfilePostCardState extends State<UserProfilePostCard> {
           },
         );
       } else if (mediaUrl.startsWith('/upload/')) {
-        final fullUrl = 'https://10.227.9.96:7135$mediaUrl';
+        final fullUrl = '${ApiConfig.baseUrl}$mediaUrl';
         return Image.network(
           fullUrl,
           fit: BoxFit.cover,

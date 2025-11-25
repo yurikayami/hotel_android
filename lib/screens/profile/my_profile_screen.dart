@@ -6,6 +6,7 @@ import '../../providers/user_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/post_provider.dart';
 import '../../services/comment_service.dart';
+import '../../services/api_config.dart';
 import '../../widgets/html_content_viewer.dart';
 import '../auth/login_screen.dart';
 import '../posts/post_detail_screen.dart';
@@ -827,7 +828,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
               const Center(child: Icon(Icons.broken_image_outlined)),
         );
       } else if (mediaUrl.startsWith('/upload/')) {
-        final fullUrl = 'https://10.227.9.96:7135$mediaUrl';
+        final fullUrl = '${ApiConfig.baseUrl}$mediaUrl';
         return Image.network(
           fullUrl,
           fit: BoxFit.cover,
@@ -1079,7 +1080,7 @@ class _LikedPostCardState extends State<_LikedPostCard> {
           },
         );
       } else if (mediaUrl.startsWith('/upload/')) {
-        final fullUrl = 'https://10.227.9.96:7135$mediaUrl';
+        final fullUrl = '${ApiConfig.baseUrl}$mediaUrl';
         return Image.network(
           fullUrl,
           fit: BoxFit.cover,

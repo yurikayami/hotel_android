@@ -4,6 +4,7 @@ import 'dart:convert';
 import '../../../models/post.dart';
 import '../../../providers/post_provider.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../services/api_config.dart';
 import '../../../widgets/html_content_viewer.dart';
 import 'package:intl/intl.dart';
 import 'post_detail_screen.dart';
@@ -534,7 +535,7 @@ class _PostCardState extends State<PostCard> {
           },
         );
       } else if (mediaUrl.startsWith('/upload/')) {
-        final fullUrl = 'https://10.227.9.96:7135$mediaUrl';
+        final fullUrl = '${ApiConfig.baseUrl}$mediaUrl';
         return Image.network(
           fullUrl,
           fit: BoxFit.cover,

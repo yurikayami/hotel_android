@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'dart:developer' as developer;
 import '../models/bai_thuoc.dart';
 import '../services/bai_thuoc_service.dart';
+import '../services/api_config.dart';
 
 /// Provider for BaiThuoc (Medical Articles) state management
 class BaiThuocProvider with ChangeNotifier {
@@ -166,7 +167,7 @@ class BaiThuocProvider with ChangeNotifier {
     if (errorStr.contains('socketexception') ||
         errorStr.contains('failed host lookup') ||
         errorStr.contains('connection refused')) {
-      return 'Không thể kết nối đến server. Vui lòng kiểm tra:\n• Kết nối mạng\n• Địa chỉ API (10.227.9.96:7135)';
+      return 'Không thể kết nối đến server. Vui lòng kiểm tra:\n• Kết nối mạng\n• Địa chỉ API (${ApiConfig.ipComputer}:7135)';
     }
 
     if (errorStr.contains('timeoutexception')) {
