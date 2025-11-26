@@ -41,7 +41,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     super.dispose();
   }
 
-  Future<void> _pickImages() async {
+  Future<void> _pickImageFromGallery() async {
     try {
       setState(() => _isLoading = true);
 
@@ -63,6 +63,34 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       }
     } catch (e) {
       print('[CreatePostScreen] Image pick error: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _captureImageFromCamera() async {
+    try {
+      setState(() => _isLoading = true);
+
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        maxHeight: 1920,
+        maxWidth: 1920,
+        imageQuality: 85,
+      );
+
+      if (image != null && mounted) {
+        setState(() {
+          _selectedImages.clear();
+          _selectedImages.add(image);
+          _isLoading = false;
+        });
+      } else if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      print('[CreatePostScreen] Camera capture error: $e');
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -392,13 +420,36 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
           ),
           const Spacer(),
+          // Camera button
           Material(
             color: _selectedImages.isEmpty
                 ? colorScheme.primaryContainer
                 : colorScheme.secondaryContainer,
             borderRadius: BorderRadius.circular(8),
             child: InkWell(
-              onTap: _isLoading ? null : _pickImages,
+              onTap: _isLoading ? null : _captureImageFromCamera,
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(
+                  Icons.camera_alt_rounded,
+                  color: _selectedImages.isEmpty
+                      ? colorScheme.onPrimaryContainer
+                      : colorScheme.onSecondaryContainer,
+                  size: 24,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Gallery button
+          Material(
+            color: _selectedImages.isEmpty
+                ? colorScheme.primaryContainer
+                : colorScheme.secondaryContainer,
+            borderRadius: BorderRadius.circular(8),
+            child: InkWell(
+              onTap: _isLoading ? null : _pickImageFromGallery,
               borderRadius: BorderRadius.circular(8),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -481,7 +532,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 color: Colors.black.withValues(alpha: 0.7),
                 borderRadius: BorderRadius.circular(20),
                 child: InkWell(
-                  onTap: _pickImages,
+                  onTap: _pickImageFromGallery,
                   borderRadius: BorderRadius.circular(20),
                   child: const Padding(
                     padding: EdgeInsets.all(6),
