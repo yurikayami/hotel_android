@@ -18,6 +18,7 @@ class FoodAnalysisProvider extends ChangeNotifier {
   List<PredictionHistory> _filteredHistory = [];
   String _selectedTimeFilter = 'all'; // all, today, week, month
   String _selectedMealFilter = 'all'; // all, breakfast, lunch, dinner, snack
+  double _calorieTarget = 2000.0; // Default target, can be edited
 
   // Getters
   bool get isLoading => _isLoading;
@@ -27,6 +28,7 @@ class FoodAnalysisProvider extends ChangeNotifier {
   List<PredictionHistory> get filteredHistory => _filteredHistory;
   String get selectedTimeFilter => _selectedTimeFilter;
   String get selectedMealFilter => _selectedMealFilter;
+  double get calorieTarget => _calorieTarget;
 
   /// Analyze a food image
   /// 
@@ -248,6 +250,124 @@ class FoodAnalysisProvider extends ChangeNotifier {
     _selectedMealFilter = 'all';
     _applyFilters();
     notifyListeners();
+  }
+
+  /// Set calorie target for the user
+  void setCalorieTarget(double target) {
+    _calorieTarget = target;
+    notifyListeners();
+  }
+
+  /// Get today's total calories from filtered history
+  double getTodayCalories() {
+    final now = DateTime.now();
+    return _filteredHistory
+        .where((item) =>
+            item.createdAt.year == now.year &&
+            item.createdAt.month == now.month &&
+            item.createdAt.day == now.day)
+        .fold(0.0, (sum, item) => sum + item.calories);
+  }
+
+  /// Get calories for the last 7 days grouped by date
+  Map<DateTime, double> getWeeklyCalories() {
+    final now = DateTime.now();
+    final weeklyData = <DateTime, double>{};
+
+    // Initialize last 7 days
+    for (int i = 6; i >= 0; i--) {
+      final date = DateTime(
+        now.year,
+        now.month,
+        now.day - i,
+      );
+      weeklyData[date] = 0.0;
+    }
+
+    // Sum calories for each day
+    for (final item in _filteredHistory) {
+      final itemDate = DateTime(
+        item.createdAt.year,
+        item.createdAt.month,
+        item.createdAt.day,
+      );
+
+      if (weeklyData.containsKey(itemDate)) {
+        weeklyData[itemDate] = (weeklyData[itemDate] ?? 0) + item.calories;
+      }
+    }
+
+    return weeklyData;
+  }
+
+  /// Get daily average calories
+  double getDailyAverage() {
+    if (_filteredHistory.isEmpty) return 0.0;
+
+    final days = <DateTime>{};
+    for (final item in _filteredHistory) {
+      days.add(DateTime(
+        item.createdAt.year,
+        item.createdAt.month,
+        item.createdAt.day,
+      ));
+    }
+
+    final totalCalories =
+        _filteredHistory.fold(0.0, (sum, item) => sum + item.calories);
+    return totalCalories / (days.isEmpty ? 1 : days.length);
+  }
+
+  /// Get highest calorie meal from history
+  PredictionHistory? getHighestCalorieMeal() {
+    if (_filteredHistory.isEmpty) return null;
+    return _filteredHistory.reduce((a, b) => a.calories > b.calories ? a : b);
+  }
+
+  /// Get meal distribution (calories per meal type) for pie chart
+  Map<String, double> getMealDistribution() {
+    final distribution = {
+      'breakfast': 0.0,
+      'lunch': 0.0,
+      'dinner': 0.0,
+      'snack': 0.0,
+    };
+
+    for (final item in _filteredHistory) {
+      final mealType = (item.mealType ?? 'lunch').toLowerCase();
+      if (distribution.containsKey(mealType)) {
+        distribution[mealType] = (distribution[mealType] ?? 0) + item.calories;
+      }
+    }
+
+    return distribution;
+  }
+
+  /// Get items grouped by date
+  Map<DateTime, List<PredictionHistory>> getGroupedByDate() {
+    final grouped = <DateTime, List<PredictionHistory>>{};
+
+    for (final item in _filteredHistory) {
+      final date = DateTime(
+        item.createdAt.year,
+        item.createdAt.month,
+        item.createdAt.day,
+      );
+
+      if (!grouped.containsKey(date)) {
+        grouped[date] = [];
+      }
+      grouped[date]!.add(item);
+    }
+
+    // Sort by date descending (newest first)
+    final sortedKeys = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
+    final sortedGrouped = <DateTime, List<PredictionHistory>>{};
+    for (final key in sortedKeys) {
+      sortedGrouped[key] = grouped[key]!;
+    }
+
+    return sortedGrouped;
   }
 
   /// Extract user-friendly error message from exception

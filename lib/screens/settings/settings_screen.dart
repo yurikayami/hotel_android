@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import '../../providers/theme_provider.dart';
+import 'privacy_terms_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -206,31 +207,24 @@ class SettingsScreen extends StatelessWidget {
             subtitle: const Text('nguyenngocphuc@gmail.com'),
           ),
 
-          // Privacy Policy
+          // Privacy & Terms - Combined with tabs
           ListTile(
             leading: Icon(
-              Icons.privacy_tip_rounded,
+              Icons.security_rounded,
               color: colorScheme.primary,
             ),
-            title: const Text('Chính sách bảo mật'),
-            subtitle: const Text('Tìm hiểu cách chúng tôi bảo vệ dữ liệu của bạn'),
+            title: const Text('Bảo mật & Điều khoản'),
+            subtitle: const Text('Chính sách bảo mật và điều khoản dịch vụ'),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
-              // TODO: Navigate to privacy policy
-            },
-          ),
-
-          // Terms of Service
-          ListTile(
-            leading: Icon(
-              Icons.description_rounded,
-              color: colorScheme.primary,
-            ),
-            title: const Text('Điều khoản dịch vụ'),
-            subtitle: const Text('Các điều khoản sử dụng ứng dụng'),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {
-              // TODO: Navigate to terms of service
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PrivacyTermsScreen(
+                    initialTab: 'privacy',
+                  ),
+                ),
+              );
             },
           ),
 

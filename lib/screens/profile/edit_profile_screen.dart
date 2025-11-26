@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/user_basic_model.dart';
 import '../../models/health_profile_model.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/food_analysis_provider.dart';
 
 /// Screen for editing user profile information
 /// Combines editing of both Basic Profile (account) and Health Profile (medical)
@@ -29,6 +30,7 @@ class _EditProfileScreenState extends State<EditProfileScreen>
   // Health Profile controllers
   late TextEditingController _heightController;
   late TextEditingController _weightController;
+  late TextEditingController _calorieTargetController;
   String? _selectedBloodType;
   late TextEditingController _emergencyNameController;
   late TextEditingController _emergencyPhoneController;
@@ -76,6 +78,7 @@ class _EditProfileScreenState extends State<EditProfileScreen>
     _bioController = TextEditingController();
     _heightController = TextEditingController();
     _weightController = TextEditingController();
+    _calorieTargetController = TextEditingController();
     _emergencyNameController = TextEditingController();
     _emergencyPhoneController = TextEditingController();
     _foodAllergiesController = TextEditingController();
@@ -94,6 +97,7 @@ class _EditProfileScreenState extends State<EditProfileScreen>
     _bioController.dispose();
     _heightController.dispose();
     _weightController.dispose();
+    _calorieTargetController.dispose();
     _emergencyNameController.dispose();
     _emergencyPhoneController.dispose();
     _foodAllergiesController.dispose();
@@ -110,10 +114,14 @@ class _EditProfileScreenState extends State<EditProfileScreen>
       // Load both basic and health profiles
       await userProvider.loadFullProfile();
 
-      // Load bio from local storage
+      // Load bio and calorie target from local storage
       final prefs = await SharedPreferences.getInstance();
       final bio = prefs.getString('user_bio') ?? '🌿 Đam mê ẩm thực & sức khỏe\n🍜 Khám phá món ăn truyền thống Việt Nam\n💚 Sống xanh, ăn sạch, khỏe đẹp mỗi ngày';
       _bioController.text = bio;
+
+      // Load calorie target (default 2000)
+      final calorieTarget = prefs.getDouble('calorie_target') ?? 2000.0;
+      _calorieTargetController.text = calorieTarget.toStringAsFixed(0);
 
       if (mounted) {
         _populateFormData(userProvider);
@@ -256,6 +264,16 @@ class _EditProfileScreenState extends State<EditProfileScreen>
       // Save bio to local storage
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_bio', _bioController.text);
+
+      // Save calorie target to local storage and provider
+      if (_calorieTargetController.text.isNotEmpty) {
+        final calorieTarget = double.tryParse(_calorieTargetController.text) ?? 2000.0;
+        await prefs.setDouble('calorie_target', calorieTarget);
+        
+        // Update provider
+        final foodProvider = context.read<FoodAnalysisProvider>();
+        foodProvider.setCalorieTarget(calorieTarget);
+      }
 
       if (!mounted) return;
 
@@ -652,6 +670,21 @@ class _EditProfileScreenState extends State<EditProfileScreen>
           ),
           const SizedBox(height: 12),
           _buildBMICard(),
+          const SizedBox(height: 24),
+
+          // Mục tiêu Calo
+          const Text(
+            'Mục tiêu hàng ngày',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 12),
+          _buildTextField(
+            controller: _calorieTargetController,
+            label: 'Mục tiêu Calo/ngày (kcal)',
+            icon: Icons.local_fire_department,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          ),
           const SizedBox(height: 24),
 
           // Bệnh lý

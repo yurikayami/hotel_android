@@ -197,17 +197,14 @@ class SearchProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // Gọi API tổng quát - dùng queryParameters để encode đúng
-      final Uri uri = Uri.https(
-        ApiConfig.ipComputer,
-        '/api/search',
-        {
-          'query': query,
-          'type': _selectedType,
-          'page': '1',
-          'limit': '20',
-        },
-      );
+      // Sử dụng ApiConfig.baseUrl để đảm bảo đúng port 7135
+      final Uri uri = Uri.parse('${ApiConfig.baseUrl}/search')
+          .replace(queryParameters: {
+        'query': query,
+        'type': _selectedType,
+        'page': '1',
+        'limit': '20',
+      });
 
       print('[SearchProvider] Search URL: $uri');
 
@@ -390,15 +387,12 @@ class SearchProvider with ChangeNotifier {
     if (query.isEmpty || query.length < 2) return [];
 
     try {
-      final Uri uri = Uri.https(
-        ApiConfig.ipComputer,
-        '/api/search/suggestions',
-        {
-          'query': query,
-          'type': _selectedType,
-          'limit': '10',
-        },
-      );
+      final Uri uri = Uri.parse('${ApiConfig.baseUrl}/search/suggestions')
+          .replace(queryParameters: {
+        'query': query,
+        'type': _selectedType,
+        'limit': '10',
+      });
 
       print('[SearchProvider] Suggestions URL: $uri');
 
