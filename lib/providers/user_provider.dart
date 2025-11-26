@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import '../models/post.dart';
 import '../models/user.dart';
+import '../models/user_basic_model.dart';
+import '../models/health_profile_model.dart';
 import '../services/user_service.dart';
 import '../services/comment_service.dart';
 import '../services/post_service.dart';
@@ -36,6 +38,12 @@ class UserProvider extends ChangeNotifier {
   bool _likedHasMore = true;
   bool _likedLoading = false;
 
+  // State - Full Profile (Split into Basic + Health)
+  UserBasicModel? _basicProfile;
+  HealthProfileModel? _healthProfile;
+  bool _profileLoading = false;
+  String? _profileError;
+
   // Getters - Posts
   User? get selectedUser => _selectedUser;
   List<Post> get userPosts => _userPosts;
@@ -55,6 +63,12 @@ class UserProvider extends ChangeNotifier {
   List<Post> get likedPosts => _likedPosts;
   bool get likedLoading => _likedLoading;
   bool get likedHasMore => _likedHasMore;
+
+  // Getters - Full Profile (Split)
+  UserBasicModel? get basicProfile => _basicProfile;
+  HealthProfileModel? get healthProfile => _healthProfile;
+  bool get profileLoading => _profileLoading;
+  String? get profileError => _profileError;
 
   /// Load user profile and their posts
   /// 
@@ -343,6 +357,121 @@ class UserProvider extends ChangeNotifier {
   /// Add a post back to liked posts (for undo action)
   void addLikedPost(Post post) {
     _likedPosts.insert(0, post);
+    notifyListeners();
+  }
+
+  /// Load full user profile (Both Basic + Health profiles)
+  /// Loads both endpoints in parallel for better performance
+  Future<void> loadFullProfile() async {
+    if (_profileLoading) return;
+
+    _profileLoading = true;
+    _profileError = null;
+    notifyListeners();
+
+    try {
+      print('[UserProvider] Loading full user profile...');
+      
+      // Load both profiles in parallel
+      await Future.wait([
+        _loadBasicProfile(),
+        _loadHealthProfile(),
+      ]);
+      
+      print('[UserProvider] Full profile loaded successfully');
+      print('[UserProvider] Basic profile id: ${_basicProfile?.id}');
+      print('[UserProvider] Health profile id: ${_healthProfile?.id}');
+      print('[UserProvider] Age (from health profile): ${_healthProfile?.age}');
+      
+      _profileLoading = false;
+      notifyListeners();
+    } catch (e) {
+      print('[UserProvider] Error loading full profile: $e');
+      _profileError = e.toString();
+      _profileLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Load basic profile (Account info)
+  Future<void> _loadBasicProfile() async {
+    try {
+      _basicProfile = await _userService.getBasicProfile();
+      print('[UserProvider] Basic profile loaded: ${_basicProfile?.userName}');
+    } catch (e) {
+      print('[UserProvider] Error loading basic profile: $e');
+      rethrow;
+    }
+  }
+
+  /// Load health profile (Medical info)
+  Future<void> _loadHealthProfile() async {
+    try {
+      _healthProfile = await _userService.getHealthProfile();
+      print('[UserProvider] Health profile loaded, age: ${_healthProfile?.age}');
+    } catch (e) {
+      print('[UserProvider] Error loading health profile: $e');
+      rethrow;
+    }
+  }
+
+  /// Update basic profile
+  /// 
+  /// [updateDto] - The basic profile data to update
+  /// Returns true if successful, false otherwise
+  Future<bool> updateBasicProfile(UpdateBasicProfileDto updateDto) async {
+    _profileLoading = true;
+    _profileError = null;
+    notifyListeners();
+
+    try {
+      print('[UserProvider] Updating basic profile...');
+      _basicProfile = await _userService.updateBasicProfile(updateDto);
+      print('[UserProvider] Basic profile updated successfully');
+      _profileLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      print('[UserProvider] Error updating basic profile: $e');
+      _profileError = e.toString();
+      _profileLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Update health profile
+  /// 
+  /// [updateDto] - The health profile data to update
+  /// Returns true if successful, false otherwise
+  Future<bool> updateHealthProfile(UpdateHealthProfileDto updateDto) async {
+    _profileLoading = true;
+    _profileError = null;
+    notifyListeners();
+
+    try {
+      print('[UserProvider] Updating health profile...');
+      _healthProfile = await _userService.updateHealthProfile(updateDto);
+      print('[UserProvider] Health profile updated successfully');
+      print('[UserProvider] New age (auto-calculated): ${_healthProfile?.age}');
+      _profileLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      print('[UserProvider] Error updating health profile: $e');
+      _profileError = e.toString();
+      _profileLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Clear full profile data
+  void clearFullProfile() {
+    _basicProfile = null;
+    _healthProfile = null;
+    _profileError = null;
+    _profileLoading = false;
     notifyListeners();
   }
 }

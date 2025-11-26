@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'utils/http_overrides.dart';
 import 'providers/auth_provider.dart';
 import 'providers/post_provider.dart';
@@ -73,6 +74,15 @@ class MyApp extends StatelessWidget {
             title: 'Hotel App',
             debugShowCheckedModeBanner: false,
             themeMode: themeProvider.themeMode,
+            localizationsDelegates: [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('vi', 'VN'), // Vietnamese
+              Locale('en', 'US'), // English
+            ],
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
             seedColor: const Color(0xFF2E7D32), // Green for health & food

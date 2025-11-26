@@ -144,6 +144,45 @@ class ApiService {
     }
   }
 
+  /// PUT request with JSON body
+  Future<dynamic> put(
+    String endpoint, {
+    required Map<String, dynamic> data,
+    bool needsAuth = true,
+  }) async {
+    try {
+      print('[ApiService] PUT Request to: ${ApiConfig.baseUrl}$endpoint');
+      print('[ApiService] Request data: $data');
+
+      final response = await http
+          .put(
+            Uri.parse('${ApiConfig.baseUrl}$endpoint'),
+            headers: _getHeaders(needsAuth: needsAuth),
+            body: jsonEncode(data),
+          )
+          .timeout(ApiConfig.connectionTimeout);
+
+      print('[ApiService] PUT Response Status: ${response.statusCode}');
+      print('[ApiService] PUT Response Headers: ${response.headers}');
+      print('[ApiService] PUT Response Body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        if (response.body.isNotEmpty) {
+          final decoded = jsonDecode(response.body);
+          print('[ApiService] PUT Response Decoded: $decoded');
+          return decoded;
+        }
+        return {'success': true};
+      } else {
+        _handleError(response);
+      }
+    } on SocketException catch (e) {
+      throw Exception('No internet connection: $e');
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
   /// DELETE request
   Future<dynamic> delete(
     String endpoint, {

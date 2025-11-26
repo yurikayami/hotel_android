@@ -1,4 +1,6 @@
 import '../models/post.dart';
+import '../models/user_basic_model.dart';
+import '../models/health_profile_model.dart';
 import 'api_service.dart';
 import 'api_config.dart';
 
@@ -77,6 +79,132 @@ class UserService {
       print('[UserService] Error loading public posts for user $userId: $e');
       print('[UserService] Stack trace: $s');
       throw Exception('Failed to load user posts: $e');
+    }
+  }
+
+  /// Get user basic profile (Account info from /api/userprofile/basic)
+  ///
+  /// Returns [UserBasicModel] containing account and identity information
+  /// Note: age will be null in this endpoint
+  Future<UserBasicModel> getBasicProfile() async {
+    try {
+      const url = '${ApiConfig.userProfile}/basic';
+      print('[UserService] Fetching basic profile from: $url');
+
+      final response = await _apiService.get(url, needsAuth: true);
+      print('[UserService] Basic Profile Response: $response');
+
+      if (response == null) {
+        throw Exception('Basic profile response is null');
+      }
+
+      final data = _extractData(response) ?? response;
+      final profile = UserBasicModel.fromJson(data);
+      print('[UserService] Successfully loaded basic profile for user: ${profile.id}');
+      return profile;
+    } catch (e, s) {
+      print('[UserService] Error loading basic profile: $e');
+      print('[UserService] Stack trace: $s');
+      throw Exception('Failed to load basic profile: $e');
+    }
+  }
+
+  /// Update user basic profile (Account info to /api/userprofile/basic)
+  ///
+  /// [updateDto] - The basic profile data to update
+  /// Returns updated [UserBasicModel]
+  Future<UserBasicModel> updateBasicProfile(
+    UpdateBasicProfileDto updateDto,
+  ) async {
+    try {
+      const url = '${ApiConfig.userProfile}/basic';
+      print('[UserService] Updating basic profile to: $url');
+
+      final requestBody = updateDto.toJson();
+      print('[UserService] Basic Update REQUEST: $requestBody');
+
+      final response = await _apiService.put(
+        url,
+        data: requestBody,
+        needsAuth: true,
+      );
+
+      if (response == null) {
+        throw Exception('Basic profile update response is null');
+      }
+
+      final data = _extractData(response) ?? response;
+      final profile = UserBasicModel.fromJson(data);
+      print('[UserService] Successfully updated basic profile for user: ${profile.id}');
+      return profile;
+    } catch (e, s) {
+      print('[UserService] Error updating basic profile: $e');
+      print('[UserService] Stack trace: $s');
+      throw Exception('Failed to update basic profile: $e');
+    }
+  }
+
+  /// Get user health profile (Medical info from /api/userprofile/health)
+  ///
+  /// Returns [HealthProfileModel] containing medical history and body metrics
+  /// Note: age is auto-calculated from dateOfBirth
+  Future<HealthProfileModel> getHealthProfile() async {
+    try {
+      const url = '${ApiConfig.userProfile}/health';
+      print('[UserService] Fetching health profile from: $url');
+
+      final response = await _apiService.get(url, needsAuth: true);
+      print('[UserService] Health Profile Response: $response');
+
+      if (response == null) {
+        throw Exception('Health profile response is null');
+      }
+
+      final data = _extractData(response) ?? response;
+      final profile = HealthProfileModel.fromJson(data);
+      print('[UserService] Successfully loaded health profile for user: ${profile.id}');
+      return profile;
+    } catch (e, s) {
+      print('[UserService] Error loading health profile: $e');
+      print('[UserService] Stack trace: $s');
+      throw Exception('Failed to load health profile: $e');
+    }
+  }
+
+  /// Update user health profile (Medical info to /api/userprofile/health)
+  ///
+  /// [updateDto] - The health profile data to update
+  /// Returns updated [HealthProfileModel]
+  /// 
+  /// Important: Do NOT include age - it's auto-calculated from dateOfBirth
+  Future<HealthProfileModel> updateHealthProfile(
+    UpdateHealthProfileDto updateDto,
+  ) async {
+    try {
+      const url = '${ApiConfig.userProfile}/health';
+      print('[UserService] Updating health profile to: $url');
+
+      final requestBody = updateDto.toJson();
+      print('[UserService] Health Update REQUEST: $requestBody');
+
+      final response = await _apiService.put(
+        url,
+        data: requestBody,
+        needsAuth: true,
+      );
+
+      if (response == null) {
+        throw Exception('Health profile update response is null');
+      }
+
+      final data = _extractData(response) ?? response;
+      final profile = HealthProfileModel.fromJson(data);
+      print('[UserService] Successfully updated health profile for user: ${profile.id}');
+      return profile;
+    } catch (e, s) {
+      print('[UserService] Error updating health profile: $e');
+      print('[UserService] Stack trace: $s');
+      throw Exception('Failed to update health profile: $e');
     }
   }
 }

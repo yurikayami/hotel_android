@@ -1,0 +1,119 @@
+Thông tin người dùng
+
+SELECT TOP (1000) [Id]
+      ,[gioi_tinh]
+      ,[tuoi]
+      ,[lan_hoat_dong_cuoi]
+      ,[UserName]
+      ,[PhoneNumber]
+      ,[DisplayName]
+  FROM [Hotel_Web].[dbo].[AspNetUsers]
+
+Dưa liệu mẫu
+Id	DateOfBirth	BloodType	EmergencyContactName	EmergencyContactPhone	HasDiabetes	HasHypertension	HasAsthma	HasHeartDisease	FoodAllergies	Age	Height	Weight	gender	OtherDiseases
+9c85a357-981f-4f8d-965b-6c28889d33fc	1997-03-14 00:00:00.0000000	A+	Nguyễn Thị A	0935648639	0	0	0	0		40	175	55	male	
+
+
+
+CREATE TABLE [dbo].[AspNetUsers](
+	[Id] [nvarchar](450) NOT NULL,
+	[gioi_tinh] [nvarchar](max) NULL,
+	[tuoi] [int] NULL,
+	[ProfilePicture] [nvarchar](max) NULL,
+	[IsFacebookLinked] [bit] NULL,
+	[IsGoogleLinked] [bit] NULL,
+	[dang_online] [bit] NULL,
+	[GoogleProfilePicture] [nvarchar](max) NULL,
+	[FacebookProfilePicture] [nvarchar](max) NULL,
+	[trang_thai] [int] NULL,
+	[lan_hoat_dong_cuoi] [datetime2](7) NULL,
+	[UserName] [nvarchar](256) NULL,
+	[NormalizedUserName] [nvarchar](256) NULL,
+	[Email] [nvarchar](256) NULL,
+	[NormalizedEmail] [nvarchar](256) NULL,
+	[EmailConfirmed] [bit] NOT NULL,
+	[PasswordHash] [nvarchar](max) NULL,
+	[SecurityStamp] [nvarchar](max) NULL,
+	[ConcurrencyStamp] [nvarchar](max) NULL,
+	[PhoneNumber] [nvarchar](max) NULL,
+	[PhoneNumberConfirmed] [bit] NOT NULL,
+	[TwoFactorEnabled] [bit] NOT NULL,
+	[LockoutEnd] [datetimeoffset](7) NULL,
+	[LockoutEnabled] [bit] NOT NULL,
+	[AccessFailedCount] [int] NOT NULL,
+	[ChuyenKhoaId] [uniqueidentifier] NULL,
+	[kinh_nghiem] [int] NULL,
+	[AvatarUrl] [nvarchar](max) NULL,
+	[DisplayName] [nvarchar](max) NULL,
+ CONSTRAINT [PK_AspNetUsers] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+
+SELECT * [Id]
+      ,[DateOfBirth]
+      ,[BloodType]
+      ,[EmergencyContactName]
+      ,[EmergencyContactPhone]
+      ,[HasDiabetes]
+      ,[HasHypertension]
+      ,[HasAsthma]
+      ,[HasHeartDisease]
+      ,[FoodAllergies]
+      ,[Age]
+      ,[Height]
+      ,[Weight]
+      ,[gender]
+      ,[OtherDiseases]
+  FROM [Hotel_Web].[dbo].[HealthProfiles]
+GO
+
+
+Hồ sơ sức khỏe
+SELECT [Id]
+      ,[gioi_tinh]
+      ,[tuoi]
+      ,[UserName]
+      ,[PhoneNumber]
+  FROM [Hotel_Web].[dbo].[AspNetUsers]
+
+
+dưa liệu mẫu
+Id	gioi_tinh	tuoi	UserName	PhoneNumber
+40d05072-2ecc-40cb-8198-1caac5b78da5	Nam	35	LucTran	NULL
+
+CREATE TABLE [dbo].[HealthProfiles](
+	[Id] [nvarchar](450) NOT NULL,
+	[UserId] [nvarchar](450) NULL,
+	[FullName] [nvarchar](max) NULL,
+	[DateOfBirth] [datetime2](7) NULL,
+	[BloodType] [nvarchar](max) NULL,
+	[EmergencyContactName] [nvarchar](max) NULL,
+	[EmergencyContactPhone] [nvarchar](max) NULL,
+	[HasDiabetes] [bit] NOT NULL,
+	[HasHypertension] [bit] NOT NULL,
+	[HasAsthma] [bit] NOT NULL,
+	[HasHeartDisease] [bit] NOT NULL,
+	[DrugAllergies] [nvarchar](max) NULL,
+	[FoodAllergies] [nvarchar](max) NULL,
+	[HasLatexAllergy] [bit] NOT NULL,
+	[CurrentMedicationsJson] [nvarchar](max) NULL,
+	[InsuranceNumber] [nvarchar](max) NULL,
+	[InsuranceProvider] [nvarchar](max) NULL,
+	[EmergencyNotes] [nvarchar](max) NULL,
+	[CreatedAt] [datetime2](7) NULL,
+	[UpdatedAt] [datetime2](7) NULL,
+	[ActivityLevel] [nvarchar](max) NULL,
+	[Age] [int] NOT NULL,
+	[Height] [float] NULL,
+	[Weight] [float] NULL,
+	[gender] [nvarchar](max) NULL,
+	[OtherDiseases] [nvarchar](max) NULL,
+ CONSTRAINT [PK_HealthProfiles] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO

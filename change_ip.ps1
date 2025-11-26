@@ -33,6 +33,9 @@ $newContent | Set-Content $configFile -Encoding UTF8
 
 Write-Host "Updated ipComputer to: $newIP"
 
+Write-Host "Running flutter clean..."
+flutter clean
+
 # Run flutter run
 Write-Host "Running flutter run..."
 flutter run

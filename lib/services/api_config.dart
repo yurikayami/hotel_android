@@ -13,11 +13,17 @@ class ApiConfig {
   static const String monAn = '/MonAn';
   static const String baiThuoc = '/BaiThuocAPI'; 
   static const String nuocUong = '/NuocUong';
+  static const String userProfile = '/UserProfile';
 
   // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 30);  
   static const Duration receiveTimeout = Duration(seconds: 30);
 }
+
+
+
+
+
 
 
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/post.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -12,6 +13,7 @@ import '../auth/login_screen.dart';
 import '../posts/post_detail_screen.dart';
 import '../settings/settings_screen.dart';
 import 'user_profile_screen.dart';
+import 'edit_profile_screen.dart';
 
 /// My profile screen - User's own profile with additional features
 class MyProfileScreen extends StatefulWidget {
@@ -26,6 +28,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
   final ScrollController _scrollController = ScrollController();
   late TabController _tabController;
   final Set<int> _loadedTabs = {};
+  String _userBio = '🌿 Đam mê ẩm thực & sức khỏe\n🍜 Khám phá món ăn truyền thống Việt Nam\n💚 Sống xanh, ăn sạch, khỏe đẹp mỗi ngày';
 
   @override
   void initState() {
@@ -45,6 +48,14 @@ class _MyProfileScreenState extends State<MyProfileScreen>
       
       if (authProvider.user != null) {
         print('[MyProfileScreen] Loading profile for current user: ${authProvider.user!.id}');
+        
+        // Load bio from local storage
+        final prefs = await SharedPreferences.getInstance();
+        final bio = prefs.getString('user_bio') ?? '🌿 Đam mê ẩm thực & sức khỏe\n🍜 Khám phá món ăn truyền thống Việt Nam\n💚 Sống xanh, ăn sạch, khỏe đẹp mỗi ngày';
+        setState(() => _userBio = bio);
+        
+        // Load both basic and health profiles
+        await userProvider.loadFullProfile();
         
         // Chỉ load những tab đã được xem trước đây
         // Không xóa dữ liệu để giữ cache
@@ -122,6 +133,10 @@ class _MyProfileScreenState extends State<MyProfileScreen>
         refresh: true,
       );
     }
+    // Reload bio
+    final prefs = await SharedPreferences.getInstance();
+    final bio = prefs.getString('user_bio') ?? '🌿 Đam mê ẩm thực & sức khỏe\n🍜 Khám phá món ăn truyền thống Việt Nam\n💚 Sống xanh, ăn sạch, khỏe đẹp mỗi ngày';
+    setState(() => _userBio = bio);
   }
 
   @override
@@ -335,13 +350,46 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                     ),
                   ),
                 ),
-
+                // Edit Profile button positioned at bottom right, aligned with avatar
+                Positioned(
+                  right: 16,
+                  bottom: 10,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      try {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const EditProfileScreen(),
+                          ),
+                        );
+                        if (result == true && mounted) {
+                          _handleRefresh();
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Lỗi: $e')),
+                          );
+                        }
+                      }
+                    },
+                    icon: const Icon(Icons.edit_rounded, size: 18),
+                    label: const Text('Chỉnh sửa'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
           // Profile content
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+            padding: const EdgeInsets.fromLTRB(16, 50, 16, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -364,9 +412,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                 const SizedBox(height: 12),
                 // Bio
                 Text(
-                  '🌿 Đam mê ẩm thực & sức khỏe\n'
-                  '🍜 Khám phá món ăn truyền thống Việt Nam\n'
-                  '💚 Sống xanh, ăn sạch, khỏe đẹp mỗi ngày',
+                  _userBio,
                   style: TextStyle(
                     color: colorScheme.onSurface,
                     fontSize: 14,
