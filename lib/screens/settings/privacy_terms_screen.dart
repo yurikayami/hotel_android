@@ -294,7 +294,7 @@ class LegalContent {
 
 • Sử dụng ứng dụng cho mục đích phi pháp hoặc bất hợp pháp
 • Tải lên hình ảnh phản cảm, bạo lực hoặc không liên quan
-• Spam hoặc qu騷扰các người dùng khác
+• Spam hoặc quấy rối các người dùng khác
 • Cố gắng hack hoặc truy cập trái phép vào hệ thống
 • Sử dụng bot hoặc tự động hóa trái phép''',
         },

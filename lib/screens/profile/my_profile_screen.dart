@@ -14,6 +14,7 @@ import '../posts/post_detail_screen.dart';
 import '../settings/settings_screen.dart';
 import 'user_profile_screen.dart';
 import 'edit_profile_screen.dart';
+import 'health_chat_screen.dart';
 
 /// My profile screen - User's own profile with additional features
 class MyProfileScreen extends StatefulWidget {
@@ -143,6 +144,19 @@ class _MyProfileScreenState extends State<MyProfileScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HealthChatScreen(),
+            ),
+          );
+        },
+        icon: const Icon(Icons.health_and_safety_outlined),
+        label: const Text('Tư vấn'),
+        tooltip: 'Chatbot tư vấn sức khỏe',
+      ),
       body: Consumer2<UserProvider, AuthProvider>(
         builder: (context, userProvider, authProvider, child) {
           if (authProvider.user == null) {

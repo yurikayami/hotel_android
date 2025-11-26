@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
 import 'utils/http_overrides.dart';
+import 'models/mon_an.dart';
 import 'providers/auth_provider.dart';
 import 'providers/post_provider.dart';
 import 'providers/user_provider.dart';
@@ -12,11 +13,14 @@ import 'providers/bai_thuoc_provider.dart';
 import 'providers/mon_an_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/search_provider.dart';
+import 'providers/health_chat_provider.dart';
 import 'services/food_analysis_service.dart';
 import 'screens/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/profile/user_profile_screen.dart';
+import 'screens/bai_thuoc/bai_thuoc_detail_screen.dart';
+import 'screens/food/mon_an_detail_screen.dart';
 import 'screens/debug_screen.dart';
 
 void main() {
@@ -40,6 +44,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => BaiThuocProvider()),
         ChangeNotifierProvider(create: (_) => MonAnProvider()),
         ChangeNotifierProvider(create: (_) => SearchProvider()),
+        ChangeNotifierProvider(create: (_) => HealthChatProvider()),
         // Provide FoodAnalysisService
         Provider<FoodAnalysisService>(
           create: (_) => FoodAnalysisService(
@@ -50,9 +55,8 @@ class MyApp extends StatelessWidget {
         ),
         // Provide FoodAnalysisProvider
         ChangeNotifierProxyProvider<FoodAnalysisService, FoodAnalysisProvider>(
-          create: (context) => FoodAnalysisProvider(
-            context.read<FoodAnalysisService>(),
-          ),
+          create: (context) =>
+              FoodAnalysisProvider(context.read<FoodAnalysisService>()),
           update: (context, service, previous) =>
               previous ?? FoodAnalysisProvider(service),
         ),
@@ -61,7 +65,10 @@ class MyApp extends StatelessWidget {
         builder: (context, themeProvider, child) {
           // Apply status bar visibility based on setting
           if (themeProvider.hideStatusBar) {
-            SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+            SystemChrome.setEnabledSystemUIMode(
+              SystemUiMode.manual,
+              overlays: [],
+            );
           } else {
             SystemChrome.setEnabledSystemUIMode(
               SystemUiMode.manual,
@@ -77,87 +84,135 @@ class MyApp extends StatelessWidget {
               Locale('vi', 'VN'), // Vietnamese
               Locale('en', 'US'), // English
             ],
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF2E7D32), // Green for health & food
-            brightness: Brightness.light,
-            primary: const Color(0xFF2E7D32), // Deep green
-            secondary: const Color(0xFFFF6F00), // Vibrant orange
-          ),
-          useMaterial3: true,
-          appBarTheme: const AppBarTheme(
-            centerTitle: false,
-            elevation: 0,
-            backgroundColor: Colors.white,
-            foregroundColor: Color(0xFF2E7D32),
-          ),
-          cardTheme: const CardThemeData(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(16)),
-            ),
-          ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFF2E7D32), // Green for health & food
+                brightness: Brightness.light,
+                primary: const Color(0xFF2E7D32), // Deep green
+                secondary: const Color(0xFFFF6F00), // Vibrant orange
+              ),
+              useMaterial3: true,
+              appBarTheme: const AppBarTheme(
+                centerTitle: false,
+                elevation: 0,
+                backgroundColor: Colors.white,
+                foregroundColor: Color(0xFF2E7D32),
+              ),
+              cardTheme: const CardThemeData(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(16)),
+                ),
+              ),
+              elevatedButtonTheme: ElevatedButtonThemeData(
+                style: ElevatedButton.styleFrom(
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              inputDecorationTheme: InputDecorationTheme(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
               ),
             ),
-          ),
-          inputDecorationTheme: InputDecorationTheme(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+            darkTheme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFF2E7D32),
+                brightness: Brightness.dark,
+                primary: const Color(0xFF4CAF50), // Lighter green for dark mode
+                secondary: const Color(0xFFFF9800), // Lighter orange
+                surface: themeProvider.pureDarkMode
+                    ? Colors.black
+                    : const Color(0xFF10140F),
+              ),
+              useMaterial3: true,
+              scaffoldBackgroundColor: themeProvider.pureDarkMode
+                  ? Colors.black
+                  : const Color(0xFF10140F),
+              appBarTheme: AppBarTheme(
+                centerTitle: false,
+                elevation: 0,
+                backgroundColor: themeProvider.pureDarkMode
+                    ? Colors.black
+                    : const Color(0xFF10140F),
+                foregroundColor: const Color(0xFF4CAF50),
+              ),
+              cardTheme: CardThemeData(
+                color: themeProvider.pureDarkMode
+                    ? const Color(0xFF10140F)
+                    : const Color(0xFF1E1E1E),
+                elevation: 2,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(16)),
+                ),
+              ),
             ),
-            filled: true,
-          ),
-        ),
-        darkTheme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF2E7D32),
-            brightness: Brightness.dark,
-            primary: const Color(0xFF4CAF50), // Lighter green for dark mode
-            secondary: const Color(0xFFFF9800), // Lighter orange
-            surface: themeProvider.pureDarkMode ? Colors.black : const Color(0xFF10140F),
-          ),
-          useMaterial3: true,
-          scaffoldBackgroundColor: themeProvider.pureDarkMode ? Colors.black : const Color(0xFF10140F),
-          appBarTheme: AppBarTheme(
-            centerTitle: false,
-            elevation: 0,
-            backgroundColor: themeProvider.pureDarkMode ? Colors.black : const Color(0xFF10140F),
-            foregroundColor: const Color(0xFF4CAF50),
-          ),
-          cardTheme: CardThemeData(
-            color: themeProvider.pureDarkMode ? const Color(0xFF10140F) : const Color(0xFF1E1E1E),
-            elevation: 2,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(16)),
-            ),
-          ),
-        ),
-        initialRoute: '/splash',
-        routes: {
-          '/splash': (context) => const SplashScreen(),
-          '/login': (context) => const LoginScreen(),
-          '/home': (context) => const HomeScreen(),
-          '/debug': (context) => const DebugScreen(),
-        },
-        onGenerateRoute: (settings) {
-          if (settings.name?.startsWith('/profile/') ?? false) {
-            final userId = settings.name!.replaceFirst('/profile/', '');
-            return MaterialPageRoute(
-              builder: (context) => UserProfileScreen(userId: userId),
-              settings: settings,
-            );
-          }
-          return null;
-        },
+            initialRoute: '/splash',
+            routes: {
+              '/splash': (context) => const SplashScreen(),
+              '/login': (context) => const LoginScreen(),
+              '/home': (context) => const HomeScreen(),
+              '/debug': (context) => const DebugScreen(),
+            },
+            onGenerateRoute: (settings) {
+              // Route for BaiThuoc detail
+              if (settings.name?.startsWith('/bai-thuoc-detail') ?? false) {
+                final id = settings.arguments as String?;
+                if (id != null) {
+                  return MaterialPageRoute(
+                    builder: (context) => BaiThuocDetailScreen(baiThuocId: id),
+                    settings: settings,
+                  );
+                }
+              }
+              // Route for MonAn detail - fetch from provider
+              if (settings.name?.startsWith('/mon-an-detail') ?? false) {
+                final id = settings.arguments as String?;
+                if (id != null) {
+                  return MaterialPageRoute(
+                    builder: (context) {
+                      final monAnProvider = context.read<MonAnProvider>();
+                      final monAn = monAnProvider.allMonAn.firstWhere(
+                        (item) => item.id == id,
+                        orElse: () => MonAn(
+                          id: '',
+                          ten: 'Không tìm thấy',
+                          moTa: '',
+                          cachCheBien: '',
+                          loai: '',
+                          gia: 0,
+                          soNguoi: 0,
+                          luotXem: 0,
+                          image: '',
+                        ),
+                      );
+                      return MonAnDetailScreen(monAn: monAn);
+                    },
+                    settings: settings,
+                  );
+                }
+              }
+              // Route for profile
+              if (settings.name?.startsWith('/profile/') ?? false) {
+                final userId = settings.name!.replaceFirst('/profile/', '');
+                return MaterialPageRoute(
+                  builder: (context) => UserProfileScreen(userId: userId),
+                  settings: settings,
+                );
+              }
+              return null;
+            },
           );
         },
       ),
     );
   }
 }
-
