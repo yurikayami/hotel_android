@@ -43,6 +43,8 @@ class BaiThuoc {
   });
 
   factory BaiThuoc.fromJson(Map<String, dynamic> json) {
+    // ignore: unused_local_variable
+    final _ = _$BaiThuocFromJson; // Suppress unused element warning
     try {
       return BaiThuoc(
         id: json['id'] as String? ?? '',

@@ -7,7 +7,6 @@ import '../../providers/auth_provider.dart';
 import 'food_result_screen.dart';
 import 'food_history_screen.dart';
 //animation phân tích
-import 'dart:ui'; // Để dùng ImageFilter (làm mờ)
 import 'dart:math' as math; // Để tính toán xoay vòng tròn
 
 /// Camera Screen with real-time preview and AI scanning interface
@@ -28,21 +27,19 @@ class _FoodCameraScreenState extends State<FoodCameraScreen>
   late Animation<double> _scannerAnimation;
   
   // Meal time settings (hours in 24-hour format)
-  late int _breakfastStart;
-  late int _breakfastEnd;
-  late int _lunchStart;
-  late int _lunchEnd;
-  late int _dinnerStart;
-  late int _dinnerEnd;
-  late int _snackStart;
-  late int _snackEnd;
+  int _breakfastStart = 6;   // 6:00 AM
+  int _breakfastEnd = 10;    // 10:00 AM
+  int _lunchStart = 11;      // 11:00 AM
+  int _lunchEnd = 14;        // 2:00 PM
+  int _dinnerStart = 17;     // 5:00 PM
+  int _dinnerEnd = 20;       // 8:00 PM
+  int _snackStart = 14;      // 2:00 PM
+  int _snackEnd = 17;        // 5:00 PM
   bool _autoSelectMealType = true;
 
   @override
   void initState() {
     super.initState();
-    // Initialize meal time settings
-    _initializeMealTimeSettings();
     
     // Khởi động camera sau khi screen được build
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -59,19 +56,6 @@ class _FoodCameraScreenState extends State<FoodCameraScreen>
     _scannerAnimation = Tween<double>(begin: -1.0, end: 1.0).animate(
       CurvedAnimation(parent: _scannerController, curve: Curves.linear),
     );
-  }
-  
-  /// Initialize meal time settings with default or saved values
-  void _initializeMealTimeSettings() {
-    // Default time ranges (can be customized in settings)
-    _breakfastStart = 6;   // 6:00 AM
-    _breakfastEnd = 10;    // 10:00 AM
-    _lunchStart = 11;      // 11:00 AM
-    _lunchEnd = 14;        // 2:00 PM
-    _dinnerStart = 17;     // 5:00 PM
-    _dinnerEnd = 20;       // 8:00 PM
-    _snackStart = 14;      // 2:00 PM
-    _snackEnd = 17;        // 5:00 PM
   }
   
   /// Auto-detect meal type based on current time
@@ -104,73 +88,178 @@ class _FoodCameraScreenState extends State<FoodCameraScreen>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) => Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          ),
           padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 16,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+            left: 20,
+            right: 20,
+            top: 12,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
           ),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Drag indicator
+                Container(
+                  width: 32,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: colorScheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                
                 // Header
-                Text(
-                  'Cài đặt thời gian bữa ăn',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Thời gian bữa ăn',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  'Tự động phát hiện bữa ăn dựa trên thời gian hiện tại',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Cấu hình tự động chọn bữa ăn dựa trên giờ hiện tại',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
                 
-                // Auto-select toggle
-                SwitchListTile(
-                  title: const Text('Tự động phát hiện bữa ăn'),
-                  subtitle: const Text('Chọn bữa ăn dựa trên thời gian hiện tại'),
-                  value: _autoSelectMealType,
-                  onChanged: (value) {
+                // Auto-select toggle - Material You 3 style
+                Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    leading: Icon(
+                      Icons.schedule_outlined,
+                      color: colorScheme.primary,
+                    ),
+                    title: const Text('Tự động phát hiện'),
+                    subtitle: const Text('Tự động chọn bữa ăn'),
+                    trailing: Switch(
+                      value: _autoSelectMealType,
+                      onChanged: (value) {
+                        setModalState(() {
+                          _autoSelectMealType = value;
+                        });
+                        setState(() {
+                          _autoSelectMealType = value;
+                        });
+                        if (value) {
+                          _autoDetectMealType();
+                        }
+                      },
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: 28),
+                
+                // Section title
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Khung giờ bữa ăn',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                
+                // Meal time settings - vertical list with Material You 3 cards
+                _buildMealTimeItem(
+                  'Sáng',
+                  _breakfastStart,
+                  _breakfastEnd,
+                  (start, end) {
                     setModalState(() {
-                      _autoSelectMealType = value;
+                      _breakfastStart = start;
+                      _breakfastEnd = end;
                     });
                     setState(() {
-                      _autoSelectMealType = value;
+                      _breakfastStart = start;
+                      _breakfastEnd = end;
                     });
-                    if (value) {
-                      _autoDetectMealType();
-                    }
                   },
+                  colorScheme,
+                  Icons.wb_sunny_outlined,
+                ),
+                const SizedBox(height: 8),
+                _buildMealTimeItem(
+                  'Trưa',
+                  _lunchStart,
+                  _lunchEnd,
+                  (start, end) {
+                    setModalState(() {
+                      _lunchStart = start;
+                      _lunchEnd = end;
+                    });
+                    setState(() {
+                      _lunchStart = start;
+                      _lunchEnd = end;
+                    });
+                  },
+                  colorScheme,
+                  Icons.light_mode_outlined,
+                ),
+                const SizedBox(height: 8),
+                _buildMealTimeItem(
+                  'Tối',
+                  _dinnerStart,
+                  _dinnerEnd,
+                  (start, end) {
+                    setModalState(() {
+                      _dinnerStart = start;
+                      _dinnerEnd = end;
+                    });
+                    setState(() {
+                      _dinnerStart = start;
+                      _dinnerEnd = end;
+                    });
+                  },
+                  colorScheme,
+                  Icons.nightlight_outlined,
+                ),
+                const SizedBox(height: 8),
+                _buildMealTimeItem(
+                  'Phụ',
+                  _snackStart,
+                  _snackEnd,
+                  (start, end) {
+                    setModalState(() {
+                      _snackStart = start;
+                      _snackEnd = end;
+                    });
+                    setState(() {
+                      _snackStart = start;
+                      _snackEnd = end;
+                    });
+                  },
+                  colorScheme,
+                  Icons.coffee_outlined,
                 ),
                 
                 const SizedBox(height: 20),
-                
-                // Meal time settings
-                _buildMealTimeSettings(colorScheme, setModalState),
-                
-                const SizedBox(height: 24),
-                
-                // Save button
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      if (_autoSelectMealType) {
-                        _autoDetectMealType();
-                      }
-                    },
-                    child: const Text('Lưu cài đặt'),
-                  ),
-                ),
               ],
             ),
           ),
@@ -179,176 +268,331 @@ class _FoodCameraScreenState extends State<FoodCameraScreen>
     );
   }
   
-  /// Build meal time settings section
-  Widget _buildMealTimeSettings(ColorScheme colorScheme, StateSetter setModalState) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildMealTimeRange(
-          'Sáng',
-          _breakfastStart,
-          _breakfastEnd,
-          (start, end) {
-            setModalState(() {
-              _breakfastStart = start;
-              _breakfastEnd = end;
-            });
-            setState(() {
-              _breakfastStart = start;
-              _breakfastEnd = end;
-            });
-          },
-          colorScheme,
-        ),
-        const SizedBox(height: 16),
-        _buildMealTimeRange(
-          'Trưa',
-          _lunchStart,
-          _lunchEnd,
-          (start, end) {
-            setModalState(() {
-              _lunchStart = start;
-              _lunchEnd = end;
-            });
-            setState(() {
-              _lunchStart = start;
-              _lunchEnd = end;
-            });
-          },
-          colorScheme,
-        ),
-        const SizedBox(height: 16),
-        _buildMealTimeRange(
-          'Tối',
-          _dinnerStart,
-          _dinnerEnd,
-          (start, end) {
-            setModalState(() {
-              _dinnerStart = start;
-              _dinnerEnd = end;
-            });
-            setState(() {
-              _dinnerStart = start;
-              _dinnerEnd = end;
-            });
-          },
-          colorScheme,
-        ),
-        const SizedBox(height: 16),
-        _buildMealTimeRange(
-          'Phụ',
-          _snackStart,
-          _snackEnd,
-          (start, end) {
-            setModalState(() {
-              _snackStart = start;
-              _snackEnd = end;
-            });
-            setState(() {
-              _snackStart = start;
-              _snackEnd = end;
-            });
-          },
-          colorScheme,
-        ),
-      ],
-    );
-  }
-  
-  /// Build individual meal time range selector
-  Widget _buildMealTimeRange(
+  /// Build Material You 3 meal time item
+  Widget _buildMealTimeItem(
     String label,
     int startHour,
     int endHour,
     Function(int, int) onChanged,
     ColorScheme colorScheme,
+    IconData icon,
   ) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: colorScheme.outlineVariant, width: 0.5),
+    return Material(
+      color: colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: () => _showTimeRangePickerDialog(label, startHour, endHour, onChanged, colorScheme),
         borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Từ', style: Theme.of(context).textTheme.bodySmall),
-                    const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: colorScheme.outlineVariant),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: DropdownButton<int>(
-                        value: startHour,
-                        isExpanded: true,
-                        underline: const SizedBox.shrink(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            onChanged(value, endHour);
-                          }
-                        },
-                        items: List.generate(24, (i) => i)
-                            .map((hour) => DropdownMenuItem(
-                              value: hour,
-                              child: Text('${hour.toString().padLeft(2, '0')}:00'),
-                            ))
-                            .toList(),
-                      ),
-                    ),
-                  ],
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
                 ),
+                child: Icon(icon, size: 20, color: colorScheme.primary),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Đến', style: Theme.of(context).textTheme.bodySmall),
-                    const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: colorScheme.outlineVariant),
-                        borderRadius: BorderRadius.circular(8),
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
-                      child: DropdownButton<int>(
-                        value: endHour,
-                        isExpanded: true,
-                        underline: const SizedBox.shrink(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            onChanged(startHour, value);
-                          }
-                        },
-                        items: List.generate(24, (i) => i)
-                            .map((hour) => DropdownMenuItem(
-                              value: hour,
-                              child: Text('${hour.toString().padLeft(2, '0')}:00'),
-                            ))
-                            .toList(),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${startHour.toString().padLeft(2, '0')}:00 - ${endHour.toString().padLeft(2, '0')}:00',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
               ),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: colorScheme.onSurfaceVariant,
+              ),
             ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+  
+  /// Show time range picker dialog - Material You 3
+  void _showTimeRangePickerDialog(
+    String mealName,
+    int currentStart,
+    int currentEnd,
+    Function(int, int) onChanged,
+    ColorScheme colorScheme,
+  ) {
+    int startHour = currentStart;
+    int endHour = currentEnd;
+    
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+          backgroundColor: colorScheme.surface,
+          elevation: 3,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Title
+                Text(
+                  'Chọn giờ $mealName',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Đặt khoảng thời gian bữa ăn',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                
+                // Time range display with chips - now clickable for Material You 3 clock picker
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Start time - clickable
+                    GestureDetector(
+                      onTap: () async {
+                        final TimeOfDay? picked = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay(hour: startHour, minute: 0),
+                          initialEntryMode: TimePickerEntryMode.dial,
+                          builder: (BuildContext context, Widget? child) {
+                            return Theme(
+                              data: Theme.of(context).copyWith(
+                                timePickerTheme: TimePickerThemeData(
+                                  backgroundColor: Theme.of(context).colorScheme.surface,
+                                  hourMinuteShape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  dayPeriodBorderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.outline,
+                                  ),
+                                  dayPeriodColor: WidgetStateColor.resolveWith((states) {
+                                    if (states.contains(WidgetState.selected)) {
+                                      return Theme.of(context).colorScheme.primaryContainer;
+                                    }
+                                    return Theme.of(context).colorScheme.surfaceContainer;
+                                  }),
+                                  dayPeriodTextColor: WidgetStateColor.resolveWith((states) {
+                                    if (states.contains(WidgetState.selected)) {
+                                      return Theme.of(context).colorScheme.onPrimaryContainer;
+                                    }
+                                    return Theme.of(context).colorScheme.onSurface;
+                                  }),
+                                  dialBackgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                  dialHandColor: Theme.of(context).colorScheme.primary,
+                                  dialTextColor: WidgetStateColor.resolveWith((states) {
+                                    if (states.contains(WidgetState.selected)) {
+                                      return Theme.of(context).colorScheme.onPrimary;
+                                    }
+                                    return Theme.of(context).colorScheme.onSurface;
+                                  }),
+                                  entryModeIconColor: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                              child: child!,
+                            );
+                          },
+                        );
+                        if (picked != null) {
+                          setDialogState(() {
+                            startHour = picked.hour;
+                          });
+                        }
+                      },
+                      child: Column(
+                        children: [
+                          Text(
+                            'Bắt đầu',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '${startHour.toString().padLeft(2, '0')}:00',
+                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onPrimaryContainer,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Icon(
+                                  Icons.schedule,
+                                  size: 20,
+                                  color: colorScheme.onPrimaryContainer,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    Icon(
+                      Icons.arrow_forward,
+                      color: colorScheme.outlineVariant,
+                      size: 24,
+                    ),
+                    
+                    // End time - clickable
+                    GestureDetector(
+                      onTap: () async {
+                        final TimeOfDay? picked = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay(hour: endHour, minute: 0),
+                          initialEntryMode: TimePickerEntryMode.dial,
+                          builder: (BuildContext context, Widget? child) {
+                            return Theme(
+                              data: Theme.of(context).copyWith(
+                                timePickerTheme: TimePickerThemeData(
+                                  backgroundColor: Theme.of(context).colorScheme.surface,
+                                  hourMinuteShape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  dayPeriodBorderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.outline,
+                                  ),
+                                  dayPeriodColor: WidgetStateColor.resolveWith((states) {
+                                    if (states.contains(WidgetState.selected)) {
+                                      return Theme.of(context).colorScheme.primaryContainer;
+                                    }
+                                    return Theme.of(context).colorScheme.surfaceContainer;
+                                  }),
+                                  dayPeriodTextColor: WidgetStateColor.resolveWith((states) {
+                                    if (states.contains(WidgetState.selected)) {
+                                      return Theme.of(context).colorScheme.onPrimaryContainer;
+                                    }
+                                    return Theme.of(context).colorScheme.onSurface;
+                                  }),
+                                  dialBackgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                  dialHandColor: Theme.of(context).colorScheme.primary,
+                                  dialTextColor: WidgetStateColor.resolveWith((states) {
+                                    if (states.contains(WidgetState.selected)) {
+                                      return Theme.of(context).colorScheme.onPrimary;
+                                    }
+                                    return Theme.of(context).colorScheme.onSurface;
+                                  }),
+                                  entryModeIconColor: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                              child: child!,
+                            );
+                          },
+                        );
+                        if (picked != null) {
+                          setDialogState(() {
+                            endHour = picked.hour;
+                          });
+                        }
+                      },
+                      child: Column(
+                        children: [
+                          Text(
+                            'Kết thúc',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: colorScheme.tertiaryContainer,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '${endHour.toString().padLeft(2, '0')}:00',
+                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onTertiaryContainer,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Icon(
+                                  Icons.schedule,
+                                  size: 20,
+                                  color: colorScheme.onTertiaryContainer,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 32),
+                
+                // Action buttons - Material You 3 style
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'Hủy',
+                        style: TextStyle(color: colorScheme.onSurface),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    FilledButton(
+                      onPressed: () {
+                        if (startHour >= endHour) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Giờ bắt đầu phải nhỏ hơn giờ kết thúc'),
+                            ),
+                          );
+                          return;
+                        }
+                        onChanged(startHour, endHour);
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Xác nhận'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -511,15 +755,21 @@ class _FoodCameraScreenState extends State<FoodCameraScreen>
             ),
 
             // Settings button
-            Material(
-              color: colorScheme.surface.withValues(alpha: 0.9),
-              shape: const CircleBorder(),
-              child: InkWell(
-                onTap: () => _showCameraSettings(colorScheme),
-                customBorder: const CircleBorder(),
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Icon(Icons.settings, color: colorScheme.onSurface),
+            Container(
+              constraints: const BoxConstraints(
+                minWidth: 48,
+                minHeight: 48,
+              ),
+              child: Material(
+                color: colorScheme.surface.withValues(alpha: 0.9),
+                shape: const CircleBorder(),
+                child: InkWell(
+                  onTap: () => _showCameraSettings(colorScheme),
+                  customBorder: const CircleBorder(),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Icon(Icons.settings, color: colorScheme.onSurface),
+                  ),
                 ),
               ),
             ),
@@ -664,15 +914,10 @@ class _FoodCameraScreenState extends State<FoodCameraScreen>
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Meal type selector
-            _buildMealTypeSelector(colorScheme),
-
-            const SizedBox(height: 20),
-
             // Action buttons
             _buildActionButtons(colorScheme),
 
@@ -683,84 +928,6 @@ class _FoodCameraScreenState extends State<FoodCameraScreen>
     );
   }
 
-  /// Build meal type selector - Scrollable to fix overflow
-  Widget _buildMealTypeSelector(ColorScheme colorScheme) {
-    final mealTypes = [
-      {'value': 'breakfast', 'label': 'Sáng', 'icon': Icons.wb_sunny_outlined},
-      {'value': 'lunch', 'label': 'Trưa', 'icon': Icons.light_mode_outlined},
-      {'value': 'dinner', 'label': 'Tối', 'icon': Icons.nightlight_outlined},
-      {'value': 'snack', 'label': 'Phụ', 'icon': Icons.coffee_outlined},
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header bữa ăn
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 12),
-          child: Text(
-            'Chọn bữa ăn',
-            style: TextStyle(
-              color: colorScheme.onSurface,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: mealTypes.map((meal) {
-              final isSelected = _selectedMealType == meal['value'];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 3),
-                child: FilterChip(
-                  selected: isSelected,
-                  label: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        meal['icon'] as IconData,
-                        size: 14,
-                        color: isSelected
-                            ? colorScheme.onSecondaryContainer
-                            : colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 5),
-                      Text(meal['label'] as String),
-                    ],
-                  ),
-                  onSelected: (_) {
-                    setState(() {
-                      _selectedMealType = meal['value'] as String;
-                    });
-                  },
-                  backgroundColor: colorScheme.surface,
-                  selectedColor: colorScheme.secondaryContainer,
-                  side: BorderSide(
-                    color: isSelected
-                        ? colorScheme.secondary
-                        : colorScheme.outline.withValues(alpha: 0.2),
-                    width: isSelected ? 1.5 : 1,
-                  ),
-                  labelStyle: TextStyle(
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    color: isSelected
-                        ? colorScheme.onSecondaryContainer
-                        : colorScheme.onSurfaceVariant,
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-      ],
-    );
-  }
 
   /// Build action buttons - Rebalanced sizing and spacing
   Widget _buildActionButtons(ColorScheme colorScheme) {

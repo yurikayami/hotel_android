@@ -158,9 +158,8 @@ class _UserProfileScreenState extends State<UserProfileScreen>
           _loadedTabs.add(1);
         }
       });
-    } else if (_lastLoadedUserId == null) {
-      // First load
-      _lastLoadedUserId = widget.userId;
+    } else {
+      _lastLoadedUserId ??= widget.userId;
     }
     
     return Scaffold(
@@ -740,7 +739,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                 height: 80,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  color: colorScheme.surfaceVariant,
+                  color: colorScheme.surfaceContainerHighest,
                 ),
                 child: _buildMedicineImageThumbnail(medicine.image),
               ),
@@ -930,7 +929,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                 );
               },
               child: Container(
-                color: Theme.of(context).colorScheme.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 child: _buildMediaGridImage(post.duongDanMedia!),
               ),
             );
@@ -1164,7 +1163,7 @@ class _UserProfilePostCardState extends State<UserProfilePostCard> {
 
     final displayText = (!shouldCollapse || _isExpanded)
         ? post.noiDung
-        : post.noiDung.substring(0, maxContentLength) + '...';
+        : '${post.noiDung.substring(0, maxContentLength)}...';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1208,7 +1207,7 @@ class _UserProfilePostCardState extends State<UserProfilePostCard> {
         child: AspectRatio(
           aspectRatio: 16 / 9,
           child: Container(
-            color: colorScheme.surfaceVariant,
+            color: colorScheme.surfaceContainerHighest,
             child: _buildImageWidget(mediaUrl),
           ),
         ),

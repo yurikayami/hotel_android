@@ -6,7 +6,7 @@ import '../models/medicine.dart';
 import '../services/api_config.dart';
 
 class MedicineService {
-  static const String baseUrl = '${ApiConfig.baseUrl}/Medicine';
+  static const String baseUrl = ApiConfig.baseUrl;
 
   /// Get public medicines for a specific user
   static Future<List<Medicine>> getPublicMedicines(
@@ -16,7 +16,7 @@ class MedicineService {
   }) async {
     try {
       final url = Uri.parse(
-        '$baseUrl/api/BaiThuocAPI/public/$userId/medicine?offset=$offset&limit=$limit',
+        '$baseUrl/BaiThuocAPI/public/$userId/medicine?offset=$offset&limit=$limit',
       );
 
       print('[MedicineService] Fetching medicines for user: $userId from: ${url.path}?offset=$offset&limit=$limit');
@@ -58,7 +58,7 @@ class MedicineService {
   }) async {
     try {
       final url = Uri.parse(
-        '$baseUrl/api/BaiThuocAPI/user/myMedicine?offset=$offset&limit=$limit',
+        '$baseUrl/BaiThuocAPI/user/myMedicine?offset=$offset&limit=$limit',
       );
 
       print('[MedicineService] Fetching my medicines from: ${url.path}?offset=$offset&limit=$limit');

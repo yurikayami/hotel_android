@@ -288,6 +288,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
               onPressed: () {
                 Navigator.pop(dialogContext);
                 context.read<AuthProvider>().logout().then((_) {
+                  if (!context.mounted) return;
                   Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(
                       builder: (context) => const LoginScreen(),
@@ -382,7 +383,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                         }
                       } catch (e) {
                         if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          ScaffoldMessenger.of(this.context).showSnackBar(
                             SnackBar(content: Text('Lỗi: $e')),
                           );
                         }
@@ -437,7 +438,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                 // Follow stats
                 Row(
                   children: [
-                    _buildFollowStat(context, '180', 'Following'),
+                    _buildFollowStat(context, '320', 'Following'),
                     const SizedBox(width: 20),
                     _buildFollowStat(context, '248', 'Followers'),
                   ],
@@ -867,7 +868,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                 );
               },
               child: Container(
-                color: Theme.of(context).colorScheme.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 child: _buildMediaGridImage(post.duongDanMedia!),
               ),
             );
@@ -1043,11 +1044,11 @@ class _LikedPostCardState extends State<_LikedPostCard> {
             .replaceAll(RegExp(r'\s+'), ' ')
             .trim();
         return plainText.length > maxContentLength
-            ? plainText.substring(0, maxContentLength) + '...'
+            ? '${plainText.substring(0, maxContentLength)}...'
             : plainText;
       } else {
         return post.noiDung.length > maxContentLength
-            ? post.noiDung.substring(0, maxContentLength) + '...'
+            ? '${post.noiDung.substring(0, maxContentLength)}...'
             : post.noiDung;
       }
     }
@@ -1120,7 +1121,7 @@ class _LikedPostCardState extends State<_LikedPostCard> {
         child: AspectRatio(
           aspectRatio: 16 / 9,
           child: Container(
-            color: colorScheme.surfaceVariant,
+            color: colorScheme.surfaceContainerHighest,
             child: _buildImageWidget(mediaUrl, colorScheme),
           ),
         ),
@@ -1305,7 +1306,7 @@ class _LikedPostCardState extends State<_LikedPostCard> {
     }).catchError((e) {
       print('[_LikedPostCard] Like error: $e');
       // Revert the local state on error
-      if (mounted) {
+      if (context.mounted) {
         setState(() {
           _isLiked = !_isLiked;
         });

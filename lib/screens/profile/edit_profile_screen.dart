@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../models/user_basic_model.dart';
 import '../../models/health_profile_model.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/food_analysis_provider.dart';
@@ -223,16 +222,7 @@ class _EditProfileScreenState extends State<EditProfileScreen>
 
     try {
       final userProvider = context.read<UserProvider>();
-
-      // Update basic profile
-      final basicUpdate = UpdateBasicProfileDto(
-        phoneNumber:
-            _phoneController.text.isEmpty ? null : _phoneController.text,
-        gender: _selectedGender,
-      );
-      await userProvider.updateBasicProfile(basicUpdate);
-
-      // Update health profile
+      final foodProvider = context.read<FoodAnalysisProvider>();
       final healthUpdate = UpdateHealthProfileDto(
         dateOfBirth: _selectedDateOfBirth,
         bloodType: _selectedBloodType,
@@ -271,7 +261,6 @@ class _EditProfileScreenState extends State<EditProfileScreen>
         await prefs.setDouble('calorie_target', calorieTarget);
         
         // Update provider
-        final foodProvider = context.read<FoodAnalysisProvider>();
         foodProvider.setCalorieTarget(calorieTarget);
       }
 
@@ -606,7 +595,7 @@ class _EditProfileScreenState extends State<EditProfileScreen>
           const SizedBox(height: 8),
           TextFormField(
             controller: _bioController,
-            maxLines: 6,
+            maxLines: 5,
             decoration: InputDecoration(
               labelText: 'Tiểu sử',
               prefixIcon: const Icon(Icons.description, size: 20),

@@ -424,7 +424,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           constraints: const BoxConstraints(maxHeight: 400, minHeight: 200),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: colorScheme.surfaceVariant,
+            color: colorScheme.surfaceContainerHighest,
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
@@ -446,7 +446,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           constraints: const BoxConstraints(maxHeight: 400, minHeight: 200),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: colorScheme.surfaceVariant,
+            color: colorScheme.surfaceContainerHighest,
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
@@ -467,7 +467,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           constraints: const BoxConstraints(maxHeight: 400, minHeight: 200),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: colorScheme.surfaceVariant,
+            color: colorScheme.surfaceContainerHighest,
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
@@ -491,7 +491,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       height: 200,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: colorScheme.surfaceVariant,
+        color: colorScheme.surfaceContainerHighest,
       ),
       child: Center(
         child: Column(

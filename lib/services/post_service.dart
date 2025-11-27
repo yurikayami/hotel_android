@@ -355,7 +355,7 @@ class PostService {
   ///
   /// [offset] - Number of posts to skip (for pagination)
   /// [limit] - Number of posts to return (max 50)
-  /// Returns Map with 'posts' (List<Post>) and 'hasMore' (bool)
+  /// Returns Map with 'posts' (`List<Post>`) and 'hasMore' (bool)
   Future<Map<String, dynamic>> getUserLikedPosts({
     int offset = 0,
     int limit = 10,

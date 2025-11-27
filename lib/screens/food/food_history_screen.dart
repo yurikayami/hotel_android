@@ -263,7 +263,7 @@ class _FoodHistoryScreenState extends State<FoodHistoryScreen> {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: _buildHistoryCard(context, item),
                 );
-              }).toList(),
+              }),
 
               const SizedBox(height: 8),
             ],
@@ -631,17 +631,17 @@ class _FoodHistoryScreenState extends State<FoodHistoryScreen> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Xóa bản ghi?'),
         content: Text('Bạn có chắc chắn muốn xóa "${item.foodName}"?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Hủy'),
           ),
           FilledButton(
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
 
               final authProvider = context.read<AuthProvider>();
               final foodProvider = context.read<FoodAnalysisProvider>();
@@ -650,13 +650,13 @@ class _FoodHistoryScreenState extends State<FoodHistoryScreen> {
                 try {
                   await foodProvider.deleteAnalysis(item.id);
 
-                  if (mounted) {
+                  if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Đã xóa thành công')),
                     );
                   }
                 } catch (e) {
-                  if (mounted) {
+                  if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Lỗi: $e'),

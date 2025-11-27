@@ -14,7 +14,9 @@ import 'providers/mon_an_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/search_provider.dart';
 import 'providers/health_chat_provider.dart';
+import 'providers/meal_reminder_provider.dart';
 import 'services/food_analysis_service.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'screens/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/home_screen.dart';
@@ -22,6 +24,7 @@ import 'screens/profile/user_profile_screen.dart';
 import 'screens/bai_thuoc/bai_thuoc_detail_screen.dart';
 import 'screens/food/mon_an_detail_screen.dart';
 import 'screens/debug_screen.dart';
+import 'screens/settings/settings_screen.dart';
 
 void main() {
   // ⚠️ Only for development - bypass SSL certificate validation
@@ -45,6 +48,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => MonAnProvider()),
         ChangeNotifierProvider(create: (_) => SearchProvider()),
         ChangeNotifierProvider(create: (_) => HealthChatProvider()),
+        ChangeNotifierProvider(
+          create: (_) => MealReminderProvider(),
+          lazy: false, // Initialize immediately to start notification checks
+        ),
         // Provide FoodAnalysisService
         Provider<FoodAnalysisService>(
           create: (_) => FoodAnalysisService(
@@ -82,7 +89,12 @@ class MyApp extends StatelessWidget {
             themeMode: themeProvider.themeMode,
             supportedLocales: const [
               Locale('vi', 'VN'), // Vietnamese
-              Locale('en', 'US'), // English
+              // Locale('en', 'US'), // English
+            ],
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
             ],
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
@@ -161,6 +173,7 @@ class MyApp extends StatelessWidget {
               '/login': (context) => const LoginScreen(),
               '/home': (context) => const HomeScreen(),
               '/debug': (context) => const DebugScreen(),
+              '/settings': (context) => const SettingsScreen(),
             },
             onGenerateRoute: (settings) {
               // Route for BaiThuoc detail

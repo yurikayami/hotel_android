@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
 import '../models/user.dart';
 import '../services/auth_service.dart';
+import '../services/user_service.dart';
 
 /// Authentication provider for state management
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
+  final UserService _userService = UserService();
 
   User? _user;
   bool _isLoading = false;
@@ -116,14 +118,40 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      // 1. Restore token from storage
       final response = await _authService.restoreSession();
 
       if (response.success && response.user != null) {
-        _user = response.user;
-        _errorMessage = null;
-        _isLoading = false;
-        notifyListeners();
-        return true;
+        // 2. Token exists, now fetch real user profile to get correct ID
+        try {
+          final userBasic = await _userService.getBasicProfile();
+
+          if (userBasic.id != null) {
+            // Update user with real data from API
+            _user = User(
+              id: userBasic.id!,
+              userName: userBasic.userName ?? 'User',
+              email: 'user@app.com', // Placeholder as BasicProfile doesn't return email
+              gioiTinh: userBasic.gender,
+              profilePicture: userBasic.profilePicture,
+              avatarUrl: userBasic.profilePicture,
+              displayName: userBasic.userName,
+            );
+            _errorMessage = null;
+            _isLoading = false;
+            notifyListeners();
+            return true;
+          } else {
+             throw Exception('User ID is null');
+          }
+        } catch (e) {
+          print('[AuthProvider] Failed to fetch user profile with restored token: $e');
+          // Token might be invalid or expired
+          await logout();
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        }
       } else {
         _user = null;
         _errorMessage = response.message;
@@ -146,4 +174,3 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 }
-

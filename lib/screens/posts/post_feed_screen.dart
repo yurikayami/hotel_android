@@ -282,7 +282,7 @@ Widget _buildCircleActionButton(BuildContext context, {required IconData icon, r
           );
 
           // Refresh feed if post was created
-          if (result == true && mounted) {
+          if (result == true && context.mounted) {
             await context.read<PostProvider>().loadPosts(refresh: true);
           }
         },
@@ -434,11 +434,11 @@ class _PostCardState extends State<PostCard> {
             .replaceAll(RegExp(r'\s+'), ' ')
             .trim();
         return plainText.length > maxContentLength
-            ? plainText.substring(0, maxContentLength) + '...'
+            ? '${plainText.substring(0, maxContentLength)}...'
             : plainText;
       } else {
         return post.noiDung.length > maxContentLength
-            ? post.noiDung.substring(0, maxContentLength) + '...'
+            ? '${post.noiDung.substring(0, maxContentLength)}...'
             : post.noiDung;
       }
     }
@@ -634,7 +634,7 @@ class _PostCardState extends State<PostCard> {
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
@@ -697,7 +697,7 @@ class _PostCardState extends State<PostCard> {
         })
         .catchError((e) {
           print('[PostCard] Like error: $e');
-          if (mounted) {
+          if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Lỗi thích bài viết: $e'),
@@ -777,27 +777,27 @@ class _PostCardState extends State<PostCard> {
   void _handleDelete(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Xóa bài viết'),
           content: const Text('Bạn có chắc chắn muốn xóa bài viết này?'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Hủy'),
             ),
             TextButton(
               onPressed: () async {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
                 try {
                   await context.read<PostProvider>().deletePost(post.id);
-                  if (mounted) {
+                  if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Đã xóa bài viết')),
                     );
                   }
                 } catch (e) {
-                  if (mounted) {
+                  if (context.mounted) {
                     String errorMsg = e.toString().replaceAll(
                       'Exception: ',
                       '',

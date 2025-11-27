@@ -40,6 +40,8 @@ class PredictionHistory {
   });
 
   factory PredictionHistory.fromJson(Map<String, dynamic> json) {
+    // ignore: unused_local_variable
+    final _ = _$PredictionHistoryFromJson;
     try {
       return PredictionHistory(
         id: json['id'] as int,
@@ -96,6 +98,8 @@ class PredictionDetail {
   });
 
   factory PredictionDetail.fromJson(Map<String, dynamic> json) {
+    // ignore: unused_local_variable
+    final _ = _$PredictionDetailFromJson;
     try {
       return PredictionDetail(
         id: json['id'] as int?,

@@ -41,7 +41,7 @@ class SearchProvider with ChangeNotifier {
   SearchResults _results = SearchResults.empty();
   String _searchQuery = '';
   String _selectedType = 'all'; // all, users, posts, dishes, medicines
-  List<String> _recentSearches = [];
+  final List<String> _recentSearches = [];
   
   // Filter & Sort states for client-side filtering
   String _filterCategory = 'Tất cả';

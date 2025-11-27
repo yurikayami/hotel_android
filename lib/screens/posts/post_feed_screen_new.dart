@@ -79,7 +79,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
           );
         },
       ),
-      floatingActionButton: _buildFloatingActionButton(context),
+      floatingActionButton: _buildFloatingActionButton(),
     );
   }
 
@@ -178,7 +178,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
     );
   }
 
-  Widget _buildFloatingActionButton(BuildContext context) {
+  Widget _buildFloatingActionButton() {
     final colorScheme = Theme.of(context).colorScheme;
 
     return FloatingActionButton.extended(
@@ -407,7 +407,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
 
     final displayText = (!shouldCollapse || _isExpanded)
         ? post.noiDung
-        : post.noiDung.substring(0, maxContentLength) + '...';
+        : '${post.noiDung.substring(0, maxContentLength)}...';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,7 +451,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
         child: AspectRatio(
           aspectRatio: 16 / 9,
           child: Container(
-            color: colorScheme.surfaceVariant,
+            color: colorScheme.surfaceContainerHighest,
             child: _buildImageWidget(mediaUrl),
           ),
         ),

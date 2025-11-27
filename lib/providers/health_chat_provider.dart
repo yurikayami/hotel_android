@@ -13,7 +13,7 @@ class HealthChatProvider extends ChangeNotifier {
   final GeminiHealthService _geminiService = GeminiHealthService();
 
   // State
-  List<ChatMessage> _messages = [];
+  final List<ChatMessage> _messages = [];
   bool _isLoading = false;
   String? _errorMessage;
   List<BaiThuoc> _suggestedBaiThuoc = [];

@@ -7,7 +7,7 @@ import '../models/health_profile_model.dart';
 /// Service for communicating with Google Gemini API for health consultations
 class GeminiHealthService {
   static const String _geminiApiKey =
-      'AIzaSyBsNWRR5jKjQUMRjrCWnb63QyrIiiOztK8'; // Replace with actual API key
+      'AIzaSyBwSNa7Jk3Q9AulqJdokTMWtrp2uLl1MIc'; // Replace with actual API key
   static const String _geminiModel = 'gemini-2.5-flash';
   static const String _geminiBaseUrl =
       'https://generativelanguage.googleapis.com/v1beta/models';

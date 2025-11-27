@@ -1,6 +1,6 @@
-/// Helper class to format and fix image URLs
 import '../services/api_config.dart';
 
+/// Helper class to format and fix image URLs
 class ImageUrlHelper {
   /// Convert a relative or localhost image URL to use the correct IP
   /// 

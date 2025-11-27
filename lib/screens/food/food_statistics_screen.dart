@@ -180,7 +180,7 @@ class _FoodStatisticsScreenState extends State<FoodStatisticsScreen> {
                           // Value label
                           if (barHeight > 0)
                             Text(
-                              '${data.calories.toStringAsFixed(0)}',
+                              data.calories.toStringAsFixed(0),
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w600,

@@ -171,7 +171,7 @@ class _LoginScreenState extends State<LoginScreen>
                           color: colorScheme.primary,
                         ),
                         filled: true,
-                        fillColor: colorScheme.surfaceVariant.withValues(
+                        fillColor: colorScheme.surfaceContainerHighest.withValues(
                           alpha: 0.5,
                         ),
                         border: OutlineInputBorder(
@@ -235,7 +235,7 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
                         ),
                         filled: true,
-                        fillColor: colorScheme.surfaceVariant.withValues(
+                        fillColor: colorScheme.surfaceContainerHighest.withValues(
                           alpha: 0.5,
                         ),
                         border: OutlineInputBorder(

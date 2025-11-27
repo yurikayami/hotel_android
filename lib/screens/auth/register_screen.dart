@@ -161,7 +161,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       hintText: 'Nhập tên người dùng',
                       prefixIcon: Icon(Icons.person_outlined, color: colorScheme.primary),
                       filled: true,
-                      fillColor: colorScheme.surfaceVariant.withValues(alpha: 0.5),
+                      fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide.none,
@@ -200,7 +200,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       hintText: 'your.email@example.com',
                       prefixIcon: Icon(Icons.email_outlined, color: colorScheme.primary),
                       filled: true,
-                      fillColor: colorScheme.surfaceVariant.withValues(alpha: 0.5),
+                      fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide.none,
@@ -246,7 +246,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                         onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                       ),
                       filled: true,
-                      fillColor: colorScheme.surfaceVariant.withValues(alpha: 0.5),
+                      fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide.none,
@@ -292,7 +292,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                         onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
                       ),
                       filled: true,
-                      fillColor: colorScheme.surfaceVariant.withValues(alpha: 0.5),
+                      fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide.none,
@@ -334,7 +334,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                             hintText: '18',
                             prefixIcon: Icon(Icons.cake_outlined, color: colorScheme.primary),
                             filled: true,
-                            fillColor: colorScheme.surfaceVariant.withValues(alpha: 0.5),
+                            fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
                               borderSide: BorderSide.none,
@@ -359,13 +359,13 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       const SizedBox(width: 16),
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _selectedGender,
+                          initialValue: _selectedGender,
                           style: theme.textTheme.bodyLarge,
                           decoration: InputDecoration(
                             labelText: 'Giới tính',
                             prefixIcon: Icon(Icons.wc_outlined, color: colorScheme.primary),
                             filled: true,
-                            fillColor: colorScheme.surfaceVariant.withValues(alpha: 0.5),
+                            fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
                               borderSide: BorderSide.none,

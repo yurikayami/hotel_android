@@ -102,7 +102,7 @@ class _MonAnScreenState extends State<MonAnScreen> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide: BorderSide(
-                              color: colorScheme.outline.withOpacity(0.3),
+                              color: colorScheme.outline.withValues(alpha: 0.3),
                             ),
                           ),
                           contentPadding: const EdgeInsets.symmetric(

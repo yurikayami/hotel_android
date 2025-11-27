@@ -262,7 +262,7 @@ class _HealthChatScreenState extends State<HealthChatScreen> {
               decoration: BoxDecoration(
                 color: isUser
                     ? colorScheme.primary
-                    : colorScheme.surfaceVariant,
+                    : colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(16).copyWith(
                   bottomLeft: !isUser ? const Radius.circular(4) : null,
                   bottomRight: isUser ? const Radius.circular(4) : null,
@@ -567,7 +567,7 @@ class _HealthChatScreenState extends State<HealthChatScreen> {
           child: Container(
             width: 140,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant.withValues(alpha: 0.3),
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               border: Border.all(
                 color: colorScheme.primary.withValues(alpha: 0.3),
                 width: 1,
