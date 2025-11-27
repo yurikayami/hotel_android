@@ -387,55 +387,85 @@ class _FoodCameraScreenState extends State<FoodCameraScreen>
       {'value': 'snack', 'label': 'Phụ', 'icon': Icons.coffee_outlined},
     ];
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: mealTypes.map((meal) {
-          final isSelected = _selectedMealType == meal['value'];
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3),
-            child: FilterChip(
-              selected: isSelected,
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    meal['icon'] as IconData,
-                    size: 14,
-                    color: isSelected
-                        ? colorScheme.onSecondaryContainer
-                        : colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 5),
-                  Text(meal['label'] as String),
-                ],
-              ),
-              onSelected: (_) {
-                setState(() {
-                  _selectedMealType = meal['value'] as String;
-                });
-              },
-              backgroundColor: colorScheme.surface,
-              selectedColor: colorScheme.secondaryContainer,
-              side: BorderSide(
-                color: isSelected
-                    ? colorScheme.secondary
-                    : colorScheme.outline.withValues(alpha: 0.2),
-                width: isSelected ? 1.5 : 1,
-              ),
-              labelStyle: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected
-                    ? colorScheme.onSecondaryContainer
-                    : colorScheme.onSurfaceVariant,
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header bữa ăn
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 12),
+          child: Text(
+            'Chọn bữa ăn',
+            style: TextStyle(
+              color: colorScheme.onSurface,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
             ),
-          );
-        }).toList(),
-      ),
+          ),
+        ),
+
+        // Meal type buttons
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: mealTypes.map((meal) {
+              final isSelected = _selectedMealType == meal['value'];
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: Material(
+                  color: isSelected
+                      ? colorScheme.primaryContainer
+                      : colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(16),
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedMealType = meal['value'] as String;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isSelected
+                              ? colorScheme.primary
+                              : colorScheme.outline.withValues(alpha: 0.3),
+                          width: isSelected ? 2 : 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            meal['icon'] as IconData,
+                            size: 18,
+                            color: isSelected
+                                ? colorScheme.onPrimaryContainer
+                                : colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            meal['label'] as String,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                              color: isSelected
+                                  ? colorScheme.onPrimaryContainer
+                                  : colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
     );
   }
 
