@@ -26,13 +26,28 @@ class _FoodCameraScreenState extends State<FoodCameraScreen>
   List<CameraDescription>? _cameras;
   late AnimationController _scannerController;
   late Animation<double> _scannerAnimation;
+  
+  // Meal time settings (hours in 24-hour format)
+  late int _breakfastStart;
+  late int _breakfastEnd;
+  late int _lunchStart;
+  late int _lunchEnd;
+  late int _dinnerStart;
+  late int _dinnerEnd;
+  late int _snackStart;
+  late int _snackEnd;
+  bool _autoSelectMealType = true;
 
   @override
   void initState() {
     super.initState();
+    // Initialize meal time settings
+    _initializeMealTimeSettings();
+    
     // Khởi động camera sau khi screen được build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeCamera();
+      _autoDetectMealType();
     });
 
     // Scanner animation
@@ -43,6 +58,298 @@ class _FoodCameraScreenState extends State<FoodCameraScreen>
 
     _scannerAnimation = Tween<double>(begin: -1.0, end: 1.0).animate(
       CurvedAnimation(parent: _scannerController, curve: Curves.linear),
+    );
+  }
+  
+  /// Initialize meal time settings with default or saved values
+  void _initializeMealTimeSettings() {
+    // Default time ranges (can be customized in settings)
+    _breakfastStart = 6;   // 6:00 AM
+    _breakfastEnd = 10;    // 10:00 AM
+    _lunchStart = 11;      // 11:00 AM
+    _lunchEnd = 14;        // 2:00 PM
+    _dinnerStart = 17;     // 5:00 PM
+    _dinnerEnd = 20;       // 8:00 PM
+    _snackStart = 14;      // 2:00 PM
+    _snackEnd = 17;        // 5:00 PM
+  }
+  
+  /// Auto-detect meal type based on current time
+  void _autoDetectMealType() {
+    if (!_autoSelectMealType) return;
+    
+    final now = DateTime.now();
+    final hour = now.hour;
+    
+    String detectedMealType = 'lunch'; // Default
+    
+    if (hour >= _breakfastStart && hour < _breakfastEnd) {
+      detectedMealType = 'breakfast';
+    } else if (hour >= _lunchStart && hour < _lunchEnd) {
+      detectedMealType = 'lunch';
+    } else if (hour >= _dinnerStart && hour < _dinnerEnd) {
+      detectedMealType = 'dinner';
+    } else if ((hour >= _snackStart && hour < _snackEnd) || 
+               (hour >= _lunchEnd && hour < _dinnerStart)) {
+      detectedMealType = 'snack';
+    }
+    
+    setState(() {
+      _selectedMealType = detectedMealType;
+    });
+  }
+  
+  /// Show camera settings with meal time customization
+  void _showCameraSettings(ColorScheme colorScheme) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Text(
+                  'Cài đặt thời gian bữa ăn',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Tự động phát hiện bữa ăn dựa trên thời gian hiện tại',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                
+                // Auto-select toggle
+                SwitchListTile(
+                  title: const Text('Tự động phát hiện bữa ăn'),
+                  subtitle: const Text('Chọn bữa ăn dựa trên thời gian hiện tại'),
+                  value: _autoSelectMealType,
+                  onChanged: (value) {
+                    setModalState(() {
+                      _autoSelectMealType = value;
+                    });
+                    setState(() {
+                      _autoSelectMealType = value;
+                    });
+                    if (value) {
+                      _autoDetectMealType();
+                    }
+                  },
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // Meal time settings
+                _buildMealTimeSettings(colorScheme, setModalState),
+                
+                const SizedBox(height: 24),
+                
+                // Save button
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      if (_autoSelectMealType) {
+                        _autoDetectMealType();
+                      }
+                    },
+                    child: const Text('Lưu cài đặt'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  
+  /// Build meal time settings section
+  Widget _buildMealTimeSettings(ColorScheme colorScheme, StateSetter setModalState) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildMealTimeRange(
+          'Sáng',
+          _breakfastStart,
+          _breakfastEnd,
+          (start, end) {
+            setModalState(() {
+              _breakfastStart = start;
+              _breakfastEnd = end;
+            });
+            setState(() {
+              _breakfastStart = start;
+              _breakfastEnd = end;
+            });
+          },
+          colorScheme,
+        ),
+        const SizedBox(height: 16),
+        _buildMealTimeRange(
+          'Trưa',
+          _lunchStart,
+          _lunchEnd,
+          (start, end) {
+            setModalState(() {
+              _lunchStart = start;
+              _lunchEnd = end;
+            });
+            setState(() {
+              _lunchStart = start;
+              _lunchEnd = end;
+            });
+          },
+          colorScheme,
+        ),
+        const SizedBox(height: 16),
+        _buildMealTimeRange(
+          'Tối',
+          _dinnerStart,
+          _dinnerEnd,
+          (start, end) {
+            setModalState(() {
+              _dinnerStart = start;
+              _dinnerEnd = end;
+            });
+            setState(() {
+              _dinnerStart = start;
+              _dinnerEnd = end;
+            });
+          },
+          colorScheme,
+        ),
+        const SizedBox(height: 16),
+        _buildMealTimeRange(
+          'Phụ',
+          _snackStart,
+          _snackEnd,
+          (start, end) {
+            setModalState(() {
+              _snackStart = start;
+              _snackEnd = end;
+            });
+            setState(() {
+              _snackStart = start;
+              _snackEnd = end;
+            });
+          },
+          colorScheme,
+        ),
+      ],
+    );
+  }
+  
+  /// Build individual meal time range selector
+  Widget _buildMealTimeRange(
+    String label,
+    int startHour,
+    int endHour,
+    Function(int, int) onChanged,
+    ColorScheme colorScheme,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: colorScheme.outlineVariant, width: 0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Từ', style: Theme.of(context).textTheme.bodySmall),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: colorScheme.outlineVariant),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: DropdownButton<int>(
+                        value: startHour,
+                        isExpanded: true,
+                        underline: const SizedBox.shrink(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            onChanged(value, endHour);
+                          }
+                        },
+                        items: List.generate(24, (i) => i)
+                            .map((hour) => DropdownMenuItem(
+                              value: hour,
+                              child: Text('${hour.toString().padLeft(2, '0')}:00'),
+                            ))
+                            .toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Đến', style: Theme.of(context).textTheme.bodySmall),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: colorScheme.outlineVariant),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: DropdownButton<int>(
+                        value: endHour,
+                        isExpanded: true,
+                        underline: const SizedBox.shrink(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            onChanged(startHour, value);
+                          }
+                        },
+                        items: List.generate(24, (i) => i)
+                            .map((hour) => DropdownMenuItem(
+                              value: hour,
+                              child: Text('${hour.toString().padLeft(2, '0')}:00'),
+                            ))
+                            .toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -208,9 +515,7 @@ class _FoodCameraScreenState extends State<FoodCameraScreen>
               color: colorScheme.surface.withValues(alpha: 0.9),
               shape: const CircleBorder(),
               child: InkWell(
-                onTap: () {
-                  // TODO: Show settings
-                },
+                onTap: () => _showCameraSettings(colorScheme),
                 customBorder: const CircleBorder(),
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
@@ -403,7 +708,6 @@ class _FoodCameraScreenState extends State<FoodCameraScreen>
           ),
         ),
 
-        // Meal type buttons
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
@@ -412,54 +716,43 @@ class _FoodCameraScreenState extends State<FoodCameraScreen>
               final isSelected = _selectedMealType == meal['value'];
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 3),
-                child: Material(
-                  color: isSelected
-                      ? colorScheme.primaryContainer
-                      : colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(16),
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        _selectedMealType = meal['value'] as String;
-                      });
-                    },
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: isSelected
-                              ? colorScheme.primary
-                              : colorScheme.outline.withValues(alpha: 0.3),
-                          width: isSelected ? 2 : 1,
-                        ),
+                child: FilterChip(
+                  selected: isSelected,
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        meal['icon'] as IconData,
+                        size: 14,
+                        color: isSelected
+                            ? colorScheme.onSecondaryContainer
+                            : colorScheme.onSurfaceVariant,
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            meal['icon'] as IconData,
-                            size: 18,
-                            color: isSelected
-                                ? colorScheme.onPrimaryContainer
-                                : colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            meal['label'] as String,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                              color: isSelected
-                                  ? colorScheme.onPrimaryContainer
-                                  : colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                      const SizedBox(width: 5),
+                      Text(meal['label'] as String),
+                    ],
                   ),
+                  onSelected: (_) {
+                    setState(() {
+                      _selectedMealType = meal['value'] as String;
+                    });
+                  },
+                  backgroundColor: colorScheme.surface,
+                  selectedColor: colorScheme.secondaryContainer,
+                  side: BorderSide(
+                    color: isSelected
+                        ? colorScheme.secondary
+                        : colorScheme.outline.withValues(alpha: 0.2),
+                    width: isSelected ? 1.5 : 1,
+                  ),
+                  labelStyle: TextStyle(
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    color: isSelected
+                        ? colorScheme.onSecondaryContainer
+                        : colorScheme.onSurfaceVariant,
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                 ),
               );
             }).toList(),
